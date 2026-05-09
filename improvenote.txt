@@ -1,0 +1,32 @@
+file uploader professional 
+
+common component convert into the duplicated file in the gloabmmangament
+
+
+role permisson
+
+multiple image render
+
+
+seo fiendly
+
+
+/*
+|--------------------------------------------------------------------------
+| reactive function called
+|--------------------------------------------------------------------------
+*/
+
+form_fields.js:
+onchangeAction: "functionName",
+
+Form.vue:
+methods():{
+    changeAction: function (actionTitle, event, ref) {
+        this[actionTitle](actionTitle, event, ref);
+    },
+    functionName(actionTitle, event, ref){
+        do something
+    }
+}
+

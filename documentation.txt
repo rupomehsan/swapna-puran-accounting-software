@@ -1,0 +1,38 @@
+
+/*
+|--------------------------------------------------------------------------
+| Example CRUD Management
+|--------------------------------------------------------------------------
+*/
+
+php artisan make:module BlogManagement/Blog [blog_category_id:bigint{BlogManagement/BlogCategory},title:string-150,description:text,content:longtext,reading_time:integer,tags:text,publish_date:datetime,writer:bigint,thumbnail_image:image-150,images:images,blog_type:enum-news.tutorial.opinion,url:url,show_top:boolean-yes.no,contributors:json,video_link:string-50,is_featured:boolean,is_published:boolean] --vue
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Command Instruction
+|--------------------------------------------------------------------------
+*/
+
+Field	Generated Input	Label
+blog_category_id:bigint	select (empty data_list)	"Select Blog Category"
+title:string-150	text	"Enter Title"
+description:text	textarea	"Enter Description"
+content:longtext	textarea	"Enter Content"
+reading_time:integer	number	"Enter Reading Time"
+publish_date:datetime	datetime-local	"Enter Publish Date"
+thumbnail_image:image-150	file single image/*	"Upload Thumbnail Image"
+images:images	file multi image/*	"Upload Images"
+blog_type:enum-news.tutorial.opinion	select 3 options	"Select Blog Type"
+url:url	url input	"Enter Url"
+show_top:boolean-yes.no	select yes/no	"Select Show Top"
+contributors:json	textarea (JSON)	"Enter Contributors"
+is_featured:boolean	select Yes/No	"Select Is Featured"
+is_published:boolean	select Yes/No	"Select Is Published"
+
+
+
+
+
+

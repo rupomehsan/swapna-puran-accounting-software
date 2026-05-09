@@ -1,0 +1,62 @@
+export default [
+  {
+    name: "role_id",
+    label: "Select  role ",
+    type: "select",
+    value: "",
+    class: "col-md-6",
+    data_list: [],
+  },
+  {
+    name: "name",
+    label: "user name",
+    type: "text",
+    value: "",
+    class: "col-md-6",
+  },
+  {
+    name: "email",
+    label: "Enter email",
+    type: "text",
+    value: "",
+    class: "col-md-6",
+  },
+  {
+    name: "phone",
+    label: "Enter phone",
+    type: "text",
+    value: "",
+    class: "col-md-6",
+  },
+
+  {
+    name: "password",
+    label: "password",
+    type: "text",
+    value: "",
+    class: "col-md-6",
+  },
+  {
+    name: "number_of_share",
+    label: "Enter number of share",
+    type: "text",
+    value: "",
+    class: "col-md-6",
+  },
+  {
+    name: "join_date",
+    label: "Enter join date",
+    type: "date",
+    value: "",
+    class: "col-md-6",
+  },
+  {
+    name: "image",
+    label: "image",
+    type: "file",
+    multiple: false,
+    accept: "image/*",
+    value: "",
+    class: "col-md-6",
+  },
+];

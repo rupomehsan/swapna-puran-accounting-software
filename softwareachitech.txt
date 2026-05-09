@@ -1,0 +1,753 @@
+# Share-Based Savings & Accounting Management System
+# Full Software Architecture, Workflow, Data Flow & Database Design
+# ================================================================
+
+
+================================================================================
+SECTION 1: SYSTEM ARCHITECTURE OVERVIEW
+================================================================================
+
+ARCHITECTURE PATTERN: Modular Monolith (Laravel Backend + Vue.js Frontend)
+
+TWO ROLES ONLY:
+  - Admin  → Full control. Creates members, records all deposits/income/expenses.
+  - Member → Read only. Views own profile, balance, transaction history, statements.
+             Members NEVER input any data.
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          CLIENT LAYER                                   │
+│                                                                         │
+│         ┌──────────────────────┐      ┌──────────────────────┐         │
+│         │     Admin Panel      │      │    Member Portal     │         │
+│         │    (Vue.js SPA)      │      │    (Vue.js SPA)       │         │
+│         │  Full CRUD access    │      │  View only — no forms │         │
+│         └──────────┬───────────┘      └──────────┬───────────┘         │
+└────────────────────┼─────────────────────────────┼─────────────────────┘
+                     │                             │
+                     └──────────────┬──────────────┘
+                                    │ HTTPS / REST API (JSON)
+                                    │
+┌───────────────────────────────────▼─────────────────────────────────────┐
+│                         API GATEWAY LAYER                               │
+│                    Laravel (PHP) — /api/v1/...                          │
+│                                                                         │
+│   ┌─────────────┐  ┌─────────────┐  ┌──────────────────────────────┐  │
+│   │    Auth     │  │  Rate Limit │  │  Middleware: role check       │  │
+│   │  (Passport) │  │  Throttle   │  │  admin → full access         │  │
+│   └─────────────┘  └─────────────┘  │  member → read own data only │  │
+│                                     └──────────────────────────────┘  │
+└───────────────────────────────────┬─────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────▼─────────────────────────────────────┐
+│                        APPLICATION LAYER                                │
+│                   (Modular — Modules/Management/)                       │
+│                                                                         │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐              │
+│  │  UserMgmt     │  │  MemberShare  │  │  DepositMgmt  │  ← Admin only│
+│  └───────────────┘  └───────────────┘  └───────────────┘              │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐              │
+│  │  WithdrawMgmt │  │  DueMgmt      │  │  IncomeMgmt   │  ← Admin only│
+│  └───────────────┘  └───────────────┘  └───────────────┘              │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐              │
+│  │  ExpenseMgmt  │  │  AccountMgmt  │  │  JournalMgmt  │  ← Admin only│
+│  └───────────────┘  └───────────────┘  └───────────────┘              │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐              │
+│  │  TransLogMgmt │  │  ConfigMgmt   │  │  ReportMgmt   │  ← Admin only│
+│  └───────────────┘  └───────────────┘  └───────────────┘              │
+└───────────────────────────────────┬─────────────────────────────────────┘
+                                    │
+┌───────────────────────────────────▼─────────────────────────────────────┐
+│                          DATA LAYER — MySQL                             │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+SECTION 2: ROLE & ACCESS CONTROL
+================================================================================
+
+ROLE: admin
+─────────────────────────────────────────────────────────────────────────
+  ✔ Create / edit / delete members
+  ✔ Allocate shares to members
+  ✔ Record deposits (on behalf of a member)
+  ✔ Record income entries
+  ✔ Record expense entries
+  ✔ Record withdrawals (on behalf of a member)
+  ✔ Mark dues as paid
+  ✔ Manage chart of accounts
+  ✔ View all reports (cash book, ledger, trial balance, P&L, balance sheet)
+  ✔ View all members' statements
+  ✔ System configuration (share price, start date)
+
+ROLE: member
+─────────────────────────────────────────────────────────────────────────
+  ✔ View own profile
+  ✔ View own share count (number_of_shares on own profile)
+  ✔ View own deposit history
+  ✔ View own due list
+  ✔ View own withdrawal history
+  ✔ View own transaction log / statement
+  ✔ View own balance
+  ✗ Cannot create, edit, or delete any record
+  ✗ Cannot see other members' data
+  ✗ Cannot access income/expense/accounting screens
+
+
+================================================================================
+SECTION 3: MODULE BREAKDOWN
+================================================================================
+
+Modules/Management/
+│
+├── Auth/                          → Login, logout, token refresh (both roles)
+├── Dashboard/                     → Admin: full summary | Member: own summary
+│
+├── UserManagement/
+│   └── User/                      → Admin: full CRUD | Member: view own profile
+│   └── Role/                      → Admin only
+│
+├── DepositManagement/
+│   └── Deposit/                   → Admin: record deposits | Member: view own
+│
+├── DueManagement/
+│   └── Due/                       → Admin: generate & mark paid | Member: view own
+│
+├── WithdrawalManagement/
+│   └── Withdrawal/                → Admin: record withdrawals | Member: view own
+│
+├── IncomeEntryManagement/
+│   └── IncomeEntry/               → Admin only (org income)
+│
+├── ExpenseEntryManagement/
+│   └── ExpenseEntry/              → Admin only (org expense)
+│
+├── AccountManagement/
+│   └── Account/                   → Admin only (chart of accounts)
+│
+├── JournalManagement/
+│   └── Journal/                   → Admin only (auto-created, admin can view)
+│   └── JournalEntry/              → Admin only
+│
+├── TransactionLogManagement/
+│   └── TransactionLog/            → Admin: view all | Member: view own
+│
+├── ConfigurationManagement/
+│   └── Configuration/             → Admin only (share price, start date)
+│
+└── ReportManagement/
+    └── Report/                    → Admin only (all financial reports)
+
+
+================================================================================
+SECTION 4: BUSINESS WORKFLOW
+================================================================================
+
+4.1 MEMBER ONBOARDING  (Admin does everything)
+────────────────────────────────────────────────
+
+  Admin → Create Member account (name, email, phone, join_date)
+       ↓
+  Admin → Set number_of_shares + joining_cost on the user record
+       ↓
+  Admin → Records joining payment as Deposit (type: share_deposit)
+       ↓
+  System auto-creates:
+    • TransactionLog entry   (type: share_deposit, direction: credit)
+    • Journal entry          DEBIT: Cash | CREDIT: Member Capital
+       ↓
+  Member account is active — monthly dues will be auto-generated
+
+
+4.2 MONTHLY DUE GENERATION  (System / Admin triggers)
+───────────────────────────────────────────────────────
+
+  Scheduler runs 1st of every month  (or Admin manually triggers)
+       ↓
+  For each active member:
+    due_amount = member.total_shares × share_price
+       ↓
+  Due record created (payment_status: unpaid)
+       ↓
+  Member can view their due in Member Portal (read only)
+
+
+4.3 DEPOSIT RECORDING  (Admin only)
+──────────────────────────────────────
+
+  Member gives money to Admin (cash/bank)
+       ↓
+  Admin → goes to Deposit module → selects member → enters amount & month
+       ↓
+  System auto:
+    • Marks the matching Due as paid
+    • Creates TransactionLog entry  (type: share_deposit, direction: credit)
+    • Creates Journal               DEBIT: Cash | CREDIT: Member Capital
+       ↓
+  Member can see updated balance in Member Portal
+
+
+4.4 WITHDRAWAL RECORDING  (Admin only)
+─────────────────────────────────────────
+
+  Member requests withdrawal verbally / on paper
+       ↓
+  Admin → Withdrawal module → selects member → enters amount
+       ↓
+  System checks:
+    available_balance = total_deposits - total_withdrawals - total_dues
+       ↓
+  Admin approves & saves
+       ↓
+  System auto:
+    • Creates TransactionLog entry  (type: withdrawal, direction: debit)
+    • Creates Journal               DEBIT: Member Capital | CREDIT: Cash
+
+
+4.5 INCOME RECORDING  (Admin only — org-level income)
+───────────────────────────────────────────────────────
+
+  Admin → IncomeEntry module → selects income source, account, amount, date
+       ↓
+  System auto:
+    • Creates TransactionLog entry  (type: income, direction: credit)
+    • Creates Journal               DEBIT: Cash | CREDIT: Income Account
+
+
+4.6 EXPENSE RECORDING  (Admin only — org-level expense)
+─────────────────────────────────────────────────────────
+
+  Admin → ExpenseEntry module → selects category, account, amount, date
+       ↓
+  System auto:
+    • Creates TransactionLog entry  (type: expense, direction: debit)
+    • Creates Journal               DEBIT: Expense Account | CREDIT: Cash
+
+
+================================================================================
+SECTION 5: DATA FLOW DIAGRAM (DFD)
+================================================================================
+
+LEVEL 0 — CONTEXT DIAGRAM
+──────────────────────────
+
+  [Admin]  ──── all inputs ────────────────────────────► [SYSTEM]
+  [Member] ──── login / view own data ─────────────────► [SYSTEM]
+                                                              │
+                                                              ▼
+                                                    [Reports & Statements]
+                                                              │
+                                           ┌─────────────────┴────────────┐
+                                           ▼                              ▼
+                                        [Admin]                        [Member]
+                                   (full reports)               (own statement only)
+
+
+LEVEL 1 — MAIN PROCESSES
+──────────────────────────
+
+  [Admin] ──create member──►  P1: Member & Share Management
+                                  → create user → allocate shares → calc joining cost
+
+  [Admin] ──record deposit──► P2: Deposit Processing
+                                  → validate → save deposit
+                                  → mark due paid
+                                  → auto TransactionLog + Journal
+
+  [Admin] ──record withdraw►  P3: Withdrawal Processing
+                                  → check balance → save withdrawal
+                                  → auto TransactionLog + Journal
+
+  [Admin] ──income entry────► P4: Income Entry
+                                  → save income
+                                  → auto TransactionLog + Journal
+
+  [Admin] ──expense entry───► P5: Expense Entry
+                                  → save expense
+                                  → auto TransactionLog + Journal
+
+  [Scheduler/Admin] ────────► P6: Monthly Due Generation
+                                  → loop active members → create dues
+
+  [Admin] ──────────────────► P7: Report Generation
+                                  → query → aggregate → return data
+
+  [Member] ─────────────────► P8: Member Self-Service (read only)
+                                  → view balance / deposits / dues / statement
+
+
+LEVEL 2 — AUTO TRANSACTION LOG FLOW
+──────────────────────────────────────
+
+  Admin saves Deposit ─────────────────────────────────┐
+  Admin saves Withdrawal ──────────────────────────────┤
+  Admin saves IncomeEntry ─────────────────────────────┤──► Observer / Service
+  Admin saves ExpenseEntry ────────────────────────────┤     auto-inserts into
+  System creates Due ──────────────────────────────────┘     transaction_logs
+                                                                    │
+                                                                    ▼
+                                              ┌─────────────────────────────────┐
+                                              │       transaction_logs          │
+                                              │  voucher_no (unique)            │
+                                              │  transaction_type               │
+                                              │  related_type + related_id      │
+                                              │  user_id (member)               │
+                                              │  amount                         │
+                                              │  direction (credit/debit)       │
+                                              │  balance_after                  │
+                                              │  transaction_date               │
+                                              └─────────────────────────────────┘
+                                                                    │
+                                                      ┌─────────────┴──────────┐
+                                                      ▼                        ▼
+                                              [journals table]       [Member Statement]
+
+
+================================================================================
+SECTION 6: DATABASE DESIGN
+================================================================================
+
+6.1 USERS TABLE
+────────────────
+Table: users
+┌─────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column          │ Type             │ Notes                                │
+├─────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id              │ bigint PK AI     │                                      │
+│ name            │ varchar(100)     │                                      │
+│ email           │ varchar(100)     │ unique                               │
+│ phone           │ varchar(20)      │                                      │
+│ password        │ varchar(255)     │ hashed                               │
+│ role            │ enum             │ admin / member                       │
+│ join_date       │ date             │                                      │
+│ number_of_shares│ integer          │ default 0 — set by admin             │
+│ joining_cost    │ decimal(10,2)    │ running_months × price × qty         │
+│ profile_image   │ varchar(255)     │ nullable                             │
+│ address         │ text             │ nullable                             │
+│ slug            │ varchar(50)      │ unique                               │
+│ creator         │ bigint           │ nullable — set by admin              │
+│ status          │ enum             │ active / inactive                    │
+│ created_at      │ timestamp        │                                      │
+│ updated_at      │ timestamp        │                                      │
+│ deleted_at      │ timestamp        │ soft delete                          │
+└─────────────────┴──────────────────┴──────────────────────────────────────┘
+NOTE: No separate roles table needed. role column = admin | member only.
+NOTE: No member_shares table — share info lives directly on the users row.
+
+
+6.2 CONFIGURATION TABLE
+────────────────────────
+Table: configurations
+┌─────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column          │ Type             │ Notes                                │
+├─────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id              │ bigint PK AI     │                                      │
+│ share_price     │ decimal(10,2)    │ default 5000.00                      │
+│ start_date      │ date             │ organization's start date            │                               │
+│ slug            │ varchar(50)      │                                      │
+│ created_at      │ timestamp        │                                      │
+│ updated_at      │ timestamp        │                                      │
+└─────────────────┴──────────────────┴──────────────────────────────────────┘
+
+
+6.3 DEPOSITS TABLE
+───────────────────
+Table: deposits
+┌──────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column           │ Type             │ Notes                                │
+├──────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id               │ bigint PK AI     │                                      │
+│ user_id          │ bigint FK        │ → users.id (the member)              │
+│ voucher_no       │ varchar(50)      │ unique, auto-generated               │
+│ deposit_type     │ enum             │ share_deposit / extra_savings        │
+│ amount           │ decimal(10,2)    │                                      │
+│ for_month        │ date             │ which month this deposit covers      │
+│ payment_date     │ date             │                                      │
+│ payment_method   │ varchar(20)      │ cash / bank / mobile_banking         │
+│ due_id           │ bigint FK        │ nullable → dues.id                   │
+│ note             │ text             │ nullable                             │
+│ received_by      │ bigint FK        │ → users.id (always an admin)         │
+│ slug             │ varchar(50)      │                                      │
+│ creator          │ bigint FK        │ → users.id (always an admin)         │
+│ status           │ enum             │ active / inactive                    │
+│ created_at       │ timestamp        │                                      │
+│ updated_at       │ timestamp        │                                      │
+│ deleted_at       │ timestamp        │ soft delete                          │
+└──────────────────┴──────────────────┴──────────────────────────────────────┘
+
+
+6.4 DUES TABLE
+───────────────
+Table: dues
+┌──────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column           │ Type             │ Notes                                │
+├──────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id               │ bigint PK AI     │                                      │
+│ user_id          │ bigint FK        │ → users.id (the member)              │
+│ due_amount       │ decimal(10,2)    │ = share_qty × share_price            │
+│ paid_amount      │ decimal(10,2)    │ default 0                            │
+│ remaining_amount │ decimal(10,2)    │ due_amount - paid_amount             │
+│ for_month        │ date             │ 1st day of the due month             │
+│ due_date         │ date             │ deadline to pay                      │
+│ payment_status   │ enum             │ unpaid / partial / paid              │
+│ note             │ text             │ nullable                             │
+│ slug             │ varchar(50)      │                                      │
+│ creator          │ bigint FK        │ → users.id (admin who generated)     │
+│ status           │ enum             │ active / inactive                    │
+│ created_at       │ timestamp        │                                      │
+│ updated_at       │ timestamp        │                                      │
+│ deleted_at       │ timestamp        │ soft delete                          │
+└──────────────────┴──────────────────┴──────────────────────────────────────┘
+
+
+6.5 WITHDRAWALS TABLE
+──────────────────────
+Table: withdrawals
+┌──────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column           │ Type             │ Notes                                │
+├──────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id               │ bigint PK AI     │                                      │
+│ user_id          │ bigint FK        │ → users.id (the member)              │
+│ voucher_no       │ varchar(50)      │ unique, auto-generated               │
+│ amount           │ decimal(10,2)    │                                      │
+│ withdrawal_date  │ date             │                                      │
+│ payment_method   │ varchar(20)      │ cash / bank / mobile_banking         │
+│ reason           │ text             │ nullable                             │
+│ note             │ text             │ nullable                             │
+│ slug             │ varchar(50)      │                                      │
+│ creator          │ bigint FK        │ → users.id (always an admin)         │
+│ status           │ enum             │ active / inactive                    │
+│ created_at       │ timestamp        │                                      │
+│ updated_at       │ timestamp        │                                      │
+│ deleted_at       │ timestamp        │ soft delete                          │
+└──────────────────┴──────────────────┴──────────────────────────────────────┘
+NOTE: No approval_status needed — admin records it directly when paying out.
+
+
+6.6 INCOME ENTRIES TABLE
+─────────────────────────
+Table: income_entries
+┌──────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column           │ Type             │ Notes                                │
+├──────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id               │ bigint PK AI     │                                      │
+│ voucher_no       │ varchar(50)      │ unique                               │
+│ income_source    │ varchar(100)     │ service charge / membership fee etc  │
+│ account_id       │ bigint FK        │ → accounts.id                        │
+│ amount           │ decimal(10,2)    │                                      │
+│ entry_date       │ date             │                                      │
+│ description      │ text             │ nullable                             │
+│ slug             │ varchar(50)      │                                      │
+│ creator          │ bigint FK        │ → users.id (always an admin)         │
+│ status           │ enum             │ active / inactive                    │
+│ created_at       │ timestamp        │                                      │
+│ updated_at       │ timestamp        │                                      │
+│ deleted_at       │ timestamp        │ soft delete                          │
+└──────────────────┴──────────────────┴──────────────────────────────────────┘
+
+
+6.7 EXPENSE ENTRIES TABLE
+──────────────────────────
+Table: expense_entries
+┌──────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column           │ Type             │ Notes                                │
+├──────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id               │ bigint PK AI     │                                      │
+│ voucher_no       │ varchar(50)      │ unique                               │
+│ expense_category │ varchar(100)     │ office rent / salary / utility etc   │
+│ account_id       │ bigint FK        │ → accounts.id                        │
+│ amount           │ decimal(10,2)    │                                      │
+│ entry_date       │ date             │                                      │
+│ description      │ text             │ nullable                             │
+│ slug             │ varchar(50)      │                                      │
+│ creator          │ bigint FK        │ → users.id (always an admin)         │
+│ status           │ enum             │ active / inactive                    │
+│ created_at       │ timestamp        │                                      │
+│ updated_at       │ timestamp        │                                      │
+│ deleted_at       │ timestamp        │ soft delete                          │
+└──────────────────┴──────────────────┴──────────────────────────────────────┘
+
+
+6.8 ACCOUNTS TABLE (Chart of Accounts)
+────────────────────────────────────────
+Table: accounts
+┌──────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column           │ Type             │ Notes                                │
+├──────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id               │ bigint PK AI     │                                      │
+│ account_code     │ varchar(20)      │ unique  e.g. 1001                    │
+│ account_name     │ varchar(100)     │ Cash, Bank, Capital, etc             │
+│ account_type     │ enum             │ asset/liability/equity/income/expense│
+│ parent_id        │ bigint FK        │ nullable → accounts.id               │
+│ opening_balance  │ decimal(10,2)    │ default 0                            │
+│ description      │ text             │ nullable                             │
+│ slug             │ varchar(50)      │                                      │
+│ creator          │ bigint FK        │ → users.id (admin)                   │
+│ status           │ enum             │ active / inactive                    │
+│ created_at       │ timestamp        │                                      │
+│ updated_at       │ timestamp        │                                      │
+│ deleted_at       │ timestamp        │ soft delete                          │
+└──────────────────┴──────────────────┴──────────────────────────────────────┘
+
+SEED — Default Chart of Accounts:
+  1000  Cash Account        (asset)
+  1001  Bank Account        (asset)
+  2000  Member Capital      (equity)
+  2001  Retained Earnings   (equity)
+  3000  Service Income      (income)
+  3001  Membership Fee      (income)
+  4000  Office Rent         (expense)
+  4001  Staff Salary        (expense)
+  4002  Utility Bill        (expense)
+
+
+6.9 JOURNALS TABLE
+────────────────────
+Table: journals
+┌──────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column           │ Type             │ Notes                                │
+├──────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id               │ bigint PK AI     │                                      │
+│ voucher_no       │ varchar(50)      │ same voucher as source transaction   │
+│ reference_type   │ varchar(50)      │ deposit / withdrawal / income /      │
+│                  │                  │ expense                              │
+│ reference_id     │ bigint           │ FK to source record (polymorphic)    │
+│ journal_date     │ date             │                                      │
+│ description      │ text             │                                      │
+│ total_debit      │ decimal(10,2)    │ must equal total_credit              │
+│ total_credit     │ decimal(10,2)    │                                      │
+│ slug             │ varchar(50)      │                                      │
+│ creator          │ bigint FK        │ → users.id (admin)                   │
+│ status           │ enum             │ active / inactive                    │
+│ created_at       │ timestamp        │                                      │
+│ updated_at       │ timestamp        │                                      │
+│ deleted_at       │ timestamp        │ soft delete                          │
+└──────────────────┴──────────────────┴──────────────────────────────────────┘
+
+
+6.10 JOURNAL ENTRIES TABLE (Line Items)
+────────────────────────────────────────
+Table: journal_entries
+┌──────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column           │ Type             │ Notes                                │
+├──────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id               │ bigint PK AI     │                                      │
+│ journal_id       │ bigint FK        │ → journals.id                        │
+│ account_id       │ bigint FK        │ → accounts.id                        │
+│ entry_type       │ enum             │ debit / credit                       │
+│ amount           │ decimal(10,2)    │                                      │
+│ description      │ text             │ nullable                             │
+│ created_at       │ timestamp        │                                      │
+│ updated_at       │ timestamp        │                                      │
+└──────────────────┴──────────────────┴──────────────────────────────────────┘
+
+
+6.11 TRANSACTION LOGS TABLE
+────────────────────────────
+Table: transaction_logs
+┌──────────────────┬──────────────────┬──────────────────────────────────────┐
+│ Column           │ Type             │ Notes                                │
+├──────────────────┼──────────────────┼──────────────────────────────────────┤
+│ id               │ bigint PK AI     │                                      │
+│ voucher_no       │ varchar(50)      │ unique                               │
+│ transaction_type │ varchar(50)      │ share_deposit / extra_savings /      │
+│                  │                  │ withdrawal / income / expense /      │
+│                  │                  │ due_created / due_collection         │
+│ related_type     │ varchar(100)     │ Deposit / Withdrawal / IncomeEntry   │
+│                  │                  │ / ExpenseEntry  (class name)         │
+│ related_id       │ bigint           │ FK to source record                  │
+│ user_id          │ bigint FK        │ → users.id  (member affected)        │
+│                  │                  │ nullable for org-level income/expense│
+│ amount           │ decimal(10,2)    │ always positive                      │
+│ direction        │ enum             │ credit / debit                       │
+│ balance_after    │ decimal(10,2)    │ member's running balance after entry │
+│                  │                  │ null for income/expense (org-level)  │
+│ transaction_date │ datetime         │                                      │
+│ description      │ text             │                                      │
+│ slug             │ varchar(50)      │                                      │
+│ creator          │ bigint FK        │ → users.id (always an admin)         │
+│ status           │ enum             │ active / inactive                    │
+│ created_at       │ timestamp        │                                      │
+│ updated_at       │ timestamp        │                                      │
+│ deleted_at       │ timestamp        │ soft delete                          │
+└──────────────────┴──────────────────┴──────────────────────────────────────┘
+
+TRANSACTION TYPE MAPPING:
+  Source            transaction_type    direction   user_id
+  ──────────────────────────────────────────────────────────
+  Deposit (share)   share_deposit       credit      member
+  Deposit (savings) extra_savings       credit      member
+  Withdrawal        withdrawal          debit       member
+  Due created       due_created         debit       member
+  Due paid          due_collection      credit      member
+  IncomeEntry       income              credit      NULL
+  ExpenseEntry      expense             debit       NULL
+
+
+================================================================================
+SECTION 7: API ROUTES & ACCESS CONTROL
+================================================================================
+
+FORMAT:  [ROLE]  METHOD  /endpoint
+
+AUTH (public)
+  POST   /api/v1/auth/login                         ← both roles
+  POST   /api/v1/auth/logout                        ← both roles
+  GET    /api/v1/auth/me                            ← both roles
+
+USERS
+  [admin]   GET    /api/v1/users                    ← list all members
+  [admin]   POST   /api/v1/users/store
+  [admin]   PUT    /api/v1/users/{slug}/update
+  [admin]   DELETE /api/v1/users/{slug}/delete
+  [member]  GET    /api/v1/users/{slug}             ← own profile only
+
+DEPOSITS
+  [admin]   GET    /api/v1/deposits
+  [admin]   POST   /api/v1/deposits/store
+  [admin]   PUT    /api/v1/deposits/{slug}/update
+  [admin]   DELETE /api/v1/deposits/{slug}/delete
+  [member]  GET    /api/v1/deposits/my              ← own deposits only
+
+DUES
+  [admin]   GET    /api/v1/dues
+  [admin]   POST   /api/v1/dues/generate            ← trigger monthly generation
+  [admin]   PUT    /api/v1/dues/{slug}/mark-paid
+  [member]  GET    /api/v1/dues/my                  ← own dues only
+
+WITHDRAWALS
+  [admin]   GET    /api/v1/withdrawals
+  [admin]   POST   /api/v1/withdrawals/store
+  [admin]   PUT    /api/v1/withdrawals/{slug}/update
+  [member]  GET    /api/v1/withdrawals/my           ← own withdrawals only
+
+INCOME ENTRIES
+  [admin]   GET    /api/v1/income-entries
+  [admin]   POST   /api/v1/income-entries/store
+  [admin]   PUT    /api/v1/income-entries/{slug}/update
+  [admin]   DELETE /api/v1/income-entries/{slug}/delete
+
+EXPENSE ENTRIES
+  [admin]   GET    /api/v1/expense-entries
+  [admin]   POST   /api/v1/expense-entries/store
+  [admin]   PUT    /api/v1/expense-entries/{slug}/update
+  [admin]   DELETE /api/v1/expense-entries/{slug}/delete
+
+ACCOUNTS
+  [admin]   GET    /api/v1/accounts
+  [admin]   POST   /api/v1/accounts/store
+  [admin]   PUT    /api/v1/accounts/{slug}/update
+
+JOURNALS
+  [admin]   GET    /api/v1/journals
+  [admin]   GET    /api/v1/journals/{slug}
+
+TRANSACTION LOGS
+  [admin]   GET    /api/v1/transaction-logs
+  [admin]   GET    /api/v1/transaction-logs/user/{user_slug}
+  [member]  GET    /api/v1/transaction-logs/my      ← own log only
+
+CONFIGURATION
+  [admin]   GET    /api/v1/configuration
+  [admin]   PUT    /api/v1/configuration/update
+
+REPORTS  (admin only)
+  GET    /api/v1/reports/dashboard-summary
+  GET    /api/v1/reports/daily-collection
+  GET    /api/v1/reports/monthly-collection
+  GET    /api/v1/reports/due-report
+  GET    /api/v1/reports/cash-book
+  GET    /api/v1/reports/ledger/{account_id}
+  GET    /api/v1/reports/trial-balance
+  GET    /api/v1/reports/profit-loss
+  GET    /api/v1/reports/balance-sheet
+  GET    /api/v1/reports/member-statement/{user_slug}
+
+MEMBER DASHBOARD (member only)
+  GET    /api/v1/member/dashboard
+         → returns: balance, total_shares, monthly_due, pending_dues, last_deposit
+
+
+================================================================================
+SECTION 8: LARAVEL MODULE GENERATION COMMANDS
+================================================================================
+
+Run in order:
+
+php artisan make:module Configuration [share_price:decimal-10-2,start_date:date,currency:string-10] --vue
+
+php artisan make:module Deposit [user_id:bigint,voucher_no:string-50,deposit_type:enum-share_deposit.extra_savings,amount:decimal-10-2,for_month:date,payment_date:date,payment_method:string-20,due_id:bigint,note:text,received_by:bigint] --vue
+
+php artisan make:module Due [user_id:bigint,due_amount:decimal-10-2,paid_amount:decimal-10-2,remaining_amount:decimal-10-2,for_month:date,due_date:date,payment_status:enum-unpaid.partial.paid,note:text] --vue
+
+php artisan make:module Withdrawal [user_id:bigint,voucher_no:string-50,amount:decimal-10-2,withdrawal_date:date,payment_method:string-20,reason:text,note:text] --vue
+
+php artisan make:module IncomeEntry [voucher_no:string-50,income_source:string-100,account_id:bigint,amount:decimal-10-2,entry_date:date,description:text] --vue
+
+php artisan make:module ExpenseEntry [voucher_no:string-50,expense_category:string-100,account_id:bigint,amount:decimal-10-2,entry_date:date,description:text] --vue
+
+php artisan make:module Account [account_code:string-20,account_name:string-100,account_type:enum-asset.liability.equity.income.expense,parent_id:bigint,opening_balance:decimal-10-2,description:text] --vue
+
+php artisan make:module Journal [voucher_no:string-50,reference_type:string-50,reference_id:bigint,journal_date:date,description:text,total_debit:decimal-10-2,total_credit:decimal-10-2] --vue
+
+php artisan make:module JournalEntry [journal_id:bigint,account_id:bigint,entry_type:enum-debit.credit,amount:decimal-10-2,description:text] --vue
+
+php artisan make:module TransactionLog [voucher_no:string-50,transaction_type:string-50,related_type:string-100,related_id:bigint,user_id:bigint,amount:decimal-10-2,direction:enum-credit.debit,balance_after:decimal-10-2,transaction_date:datetime,description:text] --vue
+
+
+================================================================================
+SECTION 9: BALANCE CALCULATION FORMULAS
+================================================================================
+
+MEMBER BALANCE (per member):
+  balance = SUM(deposits.amount WHERE user_id = X)
+          - SUM(withdrawals.amount WHERE user_id = X)
+          - SUM(dues.remaining_amount WHERE user_id = X AND payment_status != 'paid')
+
+OR using transaction_logs (faster for statement):
+  balance = SUM(amount WHERE user_id = X AND direction = 'credit')
+          - SUM(amount WHERE user_id = X AND direction = 'debit')
+
+ORG CASH BALANCE:
+  cash = SUM(deposits.amount)
+       + SUM(income_entries.amount)
+       - SUM(withdrawals.amount)
+       - SUM(expense_entries.amount)
+
+MONTHLY DUE AMOUNT (per member):
+  monthly_due = users.number_of_shares × configurations.share_price
+
+JOINING COST (for late joiners):
+  running_months = MONTHS between configurations.start_date and users.join_date
+  joining_cost   = running_months × share_price × users.number_of_shares
+  (stored on users.joining_cost when admin creates the member)
+
+
+================================================================================
+SECTION 10: ENTITY RELATIONSHIP SUMMARY
+================================================================================
+
+users (role: admin | member)
+  │   number_of_shares, joining_cost stored directly on this row
+  │
+  ├──< deposits           (user_id FK)   admin creates, member views own
+  ├──< dues               (user_id FK)   system creates, member views own
+  ├──< withdrawals        (user_id FK)   admin creates, member views own
+  └──< transaction_logs   (user_id FK)   auto-created, member views own
+                                         null for income/expense entries
+
+income_entries  ──> accounts (account_id FK)
+expense_entries ──> accounts (account_id FK)
+
+journals
+  ├── reference_type + reference_id  (polymorphic → deposits/withdrawals/income/expense)
+  └──< journal_entries (journal_id FK)
+           └──> accounts (account_id FK)
+
+accounts (self-referential via parent_id for grouped COA)
+
+configuration (single row — system settings)
+
+
+================================================================================
+END OF ARCHITECTURE DOCUMENT
+================================================================================

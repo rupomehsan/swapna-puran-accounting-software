@@ -1,0 +1,118 @@
+<?php
+
+namespace Modules\Management\TransactionLog\Actions;
+
+class GetAllData
+{
+    static $model = \Modules\Management\TransactionLog\Database\Models\Model::class;
+
+    public static function execute()
+    {
+        try {
+
+            $pageLimit = request()->input('limit') ?? 10;
+            $orderByColumn = request()->input('sort_by_col') ?? 'id';
+            $orderByType = request()->input('sort_type') ?? 'desc';
+            $status = request()->input('status') ?? 'active';
+            $fields = request()->input('fields') ?? '*';
+            $start_date = request()->input('start_date');
+            $end_date = request()->input('end_date');
+
+            $with = ['member:id,name,email'];
+
+            $condition = [];
+
+            $data = self::$model::query();
+
+            // Members can only see their own transaction logs
+            if (auth()->check() && auth()->user()?->role_id === 2) {
+                $data = $data->where('user_id', auth()->id());
+            }
+
+            // Admin can filter by a specific member
+            if (request()->has('user_id') && request()->input('user_id')) {
+                $data = $data->where('user_id', request()->input('user_id'));
+            }
+
+            // Filter by transaction type
+            if (request()->has('transaction_type') && request()->input('transaction_type')) {
+                $data = $data->where('transaction_type', request()->input('transaction_type'));
+            }
+
+            if (request()->has('search') && request()->input('search')) {
+                $searchKey = request()->input('search');
+                $data = $data->where(function ($q) use ($searchKey) {
+    $q->where('voucher_no', 'like', '%' . $searchKey . '%');    
+
+    $q->orWhere('transaction_type', 'like', '%' . $searchKey . '%');    
+
+    $q->orWhere('related_type', 'like', '%' . $searchKey . '%');    
+
+    $q->orWhere('related_id', 'like', '%' . $searchKey . '%');    
+
+    $q->orWhere('user_id', 'like', '%' . $searchKey . '%');    
+
+    $q->orWhere('amount', 'like', '%' . $searchKey . '%');    
+
+    $q->orWhere('direction', 'like', '%' . $searchKey . '%');    
+
+    $q->orWhere('balance_after', 'like', '%' . $searchKey . '%');    
+
+    $q->orWhere('transaction_date', 'like', '%' . $searchKey . '%');    
+
+    $q->orWhere('description', 'like', '%' . $searchKey . '%');              
+
+                });
+            }
+
+            if ($start_date && $end_date) {
+                 if ($end_date > $start_date) {
+                    $data->whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59']);
+                } elseif ($end_date == $start_date) {
+                    $data->whereDate('created_at', $start_date);
+                }
+            }
+
+            if ($status == 'trashed') {
+                $data = $data->onlyTrashed();
+            }
+
+            if (request()->has('get_all') && (int)request()->input('get_all') === 1) {
+                $data = $data
+                    ->with($with)
+                    ->select($fields)
+                    ->where($condition)
+                    ->where('status', $status)
+                    ->limit($pageLimit)
+                    ->orderBy($orderByColumn, $orderByType)
+                    ->get();
+                     return entityResponse($data);
+            } else if ($status == 'trashed') {
+                $data = $data
+                    ->with($with)
+                    ->select($fields)
+                    ->where($condition)
+                    ->orderBy($orderByColumn, $orderByType)
+                    ->paginate($pageLimit);
+            } else {
+                $data = $data
+                    ->with($with)
+                    ->select($fields)
+                    ->where($condition)
+                    ->where('status', $status)
+                    ->orderBy($orderByColumn, $orderByType)
+                    ->paginate($pageLimit);
+            }
+
+            return entityResponse([
+                ...$data->toArray(),
+                "active_data_count" => self::$model::active()->count(),
+                "inactive_data_count" => self::$model::inactive()->count(),
+                "trashed_data_count" => self::$model::onlyTrashed()->count(),
+            ]);
+
+        } catch (\Exception $e) {
+            return messageResponse($e->getMessage(), [], 500, 'server_error');
+        }
+    }
+}
