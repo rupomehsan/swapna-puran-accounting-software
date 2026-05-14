@@ -6,61 +6,135 @@
          HERO BANNER
     ════════════════════════════════════════════════ -->
     <section class="hero">
-      <div class="hero__bg"></div>
+      <!-- Animated background orbs -->
+      <div class="hero__orb hero__orb--1"></div>
+      <div class="hero__orb hero__orb--2"></div>
+      <div class="hero__orb hero__orb--3"></div>
+      <div class="hero__orb hero__orb--4"></div>
+      <!-- Dot-grid texture -->
+      <div class="hero__grid"></div>
       <div class="hero__overlay"></div>
 
       <div class="hero__content">
-        <!-- Logo + identity -->
+        <!-- Identity column -->
         <div class="hero__identity">
-          <div class="hero__logo-ring">
-            <img v-if="siteLogo" :src="siteLogo" :alt="siteName" class="hero__logo-img" />
-            <span v-else class="hero__logo-text">শপ</span>
+          <div class="hero__badge">
+            <span class="hero__badge-pulse"></span>
+            অফিসিয়াল মেম্বার পোর্টাল
           </div>
+
+          <div class="hero__logo-wrap">
+            <div class="hero__logo-ring-spin"></div>
+            <div class="hero__logo-ring-spin hero__logo-ring-spin--rev"></div>
+            <div class="hero__logo-ring">
+              <img v-if="siteLogo" :src="siteLogo" :alt="siteName" class="hero__logo-img" />
+              <span v-else class="hero__logo-text">শপ</span>
+            </div>
+          </div>
+
           <h1 class="hero__name">{{ siteName }}</h1>
-          <p class="hero__slogan">সঞ্চয় · সমৃদ্ধি · সহযোগিতা</p>
+
+          <div class="hero__slogan-row">
+            <span class="hero__slogan-sep"></span>
+            <p class="hero__slogan">সঞ্চয় &nbsp;·&nbsp; সমৃদ্ধি &nbsp;·&nbsp; সহযোগিতা</p>
+            <span class="hero__slogan-sep"></span>
+          </div>
+
+          <p class="hero__desc">আমাদের সদস্যদের আর্থিক উন্নয়নে প্রতিশ্রুতিবদ্ধ<br/>একটি বিশ্বস্ত সঞ্চয় সংগঠন।</p>
+
+          <div class="hero__cta-row">
+            <a href="#home" @click.prevent="scrollTo('home')" class="hero__cta hero__cta--primary">
+              <i class="fas fa-users"></i> সদস্য দেখুন
+            </a>
+            <a href="#about" @click.prevent="scrollTo('about')" class="hero__cta hero__cta--outline">
+              আমাদের সম্পর্কে
+            </a>
+          </div>
         </div>
 
         <!-- Stats grid -->
         <div class="hero__stats">
           <div class="stat-card stat-card--green">
-            <i class="stat-card__icon">💰</i>
+            <div class="stat-card__accent"></div>
+            <div class="stat-card__top">
+              <div class="stat-card__icon-wrap"><i class="fas fa-coins"></i></div>
+              <span class="stat-card__trend stat-card__trend--up"><i class="fas fa-arrow-trend-up"></i></span>
+            </div>
             <span class="stat-card__label">Net Fund</span>
             <span class="stat-card__value">৳ {{ fmt(org.net_fund) }}</span>
+            <div class="stat-card__bar"><div class="stat-card__bar-fill"></div></div>
           </div>
+
           <div class="stat-card stat-card--blue">
-            <i class="stat-card__icon">📥</i>
+            <div class="stat-card__accent"></div>
+            <div class="stat-card__top">
+              <div class="stat-card__icon-wrap"><i class="fas fa-piggy-bank"></i></div>
+              <span class="stat-card__trend stat-card__trend--up"><i class="fas fa-arrow-trend-up"></i></span>
+            </div>
             <span class="stat-card__label">Total Deposits</span>
             <span class="stat-card__value">৳ {{ fmt(org.total_deposits) }}</span>
+            <div class="stat-card__bar"><div class="stat-card__bar-fill"></div></div>
           </div>
+
           <div class="stat-card stat-card--purple">
-            <i class="stat-card__icon">📈</i>
+            <div class="stat-card__accent"></div>
+            <div class="stat-card__top">
+              <div class="stat-card__icon-wrap"><i class="fas fa-chart-line"></i></div>
+              <span class="stat-card__trend stat-card__trend--up"><i class="fas fa-arrow-trend-up"></i></span>
+            </div>
             <span class="stat-card__label">Total Income</span>
             <span class="stat-card__value">৳ {{ fmt(org.total_income) }}</span>
+            <div class="stat-card__bar"><div class="stat-card__bar-fill"></div></div>
           </div>
+
           <div class="stat-card stat-card--orange">
-            <i class="stat-card__icon">📉</i>
+            <div class="stat-card__accent"></div>
+            <div class="stat-card__top">
+              <div class="stat-card__icon-wrap"><i class="fas fa-receipt"></i></div>
+              <span class="stat-card__trend stat-card__trend--down"><i class="fas fa-arrow-trend-down"></i></span>
+            </div>
             <span class="stat-card__label">Total Expense</span>
             <span class="stat-card__value">৳ {{ fmt(org.total_expense) }}</span>
+            <div class="stat-card__bar"><div class="stat-card__bar-fill"></div></div>
           </div>
+
           <div class="stat-card stat-card--red">
-            <i class="stat-card__icon">📤</i>
+            <div class="stat-card__accent"></div>
+            <div class="stat-card__top">
+              <div class="stat-card__icon-wrap"><i class="fas fa-arrow-up-from-bracket"></i></div>
+              <span class="stat-card__trend stat-card__trend--down"><i class="fas fa-arrow-trend-down"></i></span>
+            </div>
             <span class="stat-card__label">Withdrawals</span>
             <span class="stat-card__value">৳ {{ fmt(org.total_withdrawals) }}</span>
+            <div class="stat-card__bar"><div class="stat-card__bar-fill"></div></div>
           </div>
+
           <div class="stat-card stat-card--teal">
-            <i class="stat-card__icon">👥</i>
-            <span class="stat-card__label">Members</span>
+            <div class="stat-card__accent"></div>
+            <div class="stat-card__top">
+              <div class="stat-card__icon-wrap"><i class="fas fa-user-group"></i></div>
+              <span class="stat-card__trend stat-card__trend--up"><i class="fas fa-arrow-trend-up"></i></span>
+            </div>
+            <span class="stat-card__label">Total Members</span>
             <span class="stat-card__value">{{ org.total_members }}</span>
+            <div class="stat-card__bar"><div class="stat-card__bar-fill"></div></div>
           </div>
         </div>
       </div>
 
-      <!-- Wave bottom edge -->
+      <!-- Animated wave bottom — 3 stacked layers -->
       <div class="hero__wave">
-        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="rgba(16,185,129,0.25)" />
-          <path d="M0,50 C480,10 960,70 1440,30 L1440,80 L0,80 Z" fill="rgba(99,102,241,0.30)" />
-          <path d="M0,60 C300,20 900,80 1440,45 L1440,80 L0,80 Z" fill="#0d1320" />
+        <svg class="wl wl--1" viewBox="0 0 1440 130" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,55 C200,110 500,10 720,65 C940,115 1200,20 1440,70 L1440,130 L0,130 Z" fill="rgba(99,102,241,0.55)"/>
+        </svg>
+        <svg class="wl wl--2" viewBox="0 0 1440 130" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,70 C300,20 600,110 900,55 C1100,15 1300,85 1440,50 L1440,130 L0,130 Z" fill="rgba(16,185,129,0.50)"/>
+        </svg>
+        <svg class="wl wl--3" viewBox="0 0 1440 130" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,85 C240,35 600,120 900,70 C1100,30 1280,95 1440,60 L1440,130 L0,130 Z" fill="rgba(139,92,246,0.35)"/>
+        </svg>
+        <svg class="wl wl--base" viewBox="0 0 1440 130" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,100 C360,50 900,130 1440,75 L1440,130 L0,130 Z" fill="#0d1320"/>
         </svg>
       </div>
     </section>
@@ -68,7 +142,7 @@
     <!-- ═══════════════════════════════════════════
          MEMBER LIST
     ════════════════════════════════════════════════ -->
-    <section class="members">
+    <section id="home" class="members">
       <div class="members__wrap">
         <!-- Section heading -->
         <div class="members__heading">
@@ -77,10 +151,10 @@
             <span class="members__count">{{ members.length }} active members</span>
           </div>
           <div class="members__menu">
-            <a href="/admin/transaction-log" class="members__menu-link"><i class="fas fa-history"></i> Transaction Log</a>
-            <a href="/admin/income" class="members__menu-link"><i class="fas fa-arrow-down"></i> Income</a>
-            <a href="/admin/expense" class="members__menu-link"><i class="fas fa-arrow-up"></i> Expense</a>
-            <a href="/admin/balance-sheet" class="members__menu-link"><i class="fas fa-file-invoice-dollar"></i> Balance Sheet</a>
+            <Link href="/transaction-log" class="members__menu-link"><i class="fas fa-history"></i> Transaction Log</Link>
+            <Link href="/income" class="members__menu-link"><i class="fas fa-arrow-down"></i> Income</Link>
+            <Link href="/expense" class="members__menu-link"><i class="fas fa-arrow-up"></i> Expense</Link>
+            <Link href="/balance-sheet" class="members__menu-link"><i class="fas fa-file-invoice-dollar"></i> Balance Sheet</Link>
           </div>
         </div>
 
@@ -94,9 +168,9 @@
         <div v-else>
           <div v-for="(m, idx) in members" :key="m.id">
             <!-- Row -->
-            <div class="mrow" :class="{ 'mrow--open': expandedId === m.id }">
+            <div class="mrow">
               <div class="mrow__avatar" :style="{ background: avatarColor(idx) }">
-                <img v-if="m.image" :src="m.image" :alt="m.name" @error="(e) => (e.target.style.display = 'none')" />
+                <img v-if="m.image" :src="imgUrl(m.image)" :alt="m.name" @error="(e) => (e.target.style.display = 'none')" />
                 <span v-else>{{ initials(m.name) }}</span>
               </div>
 
@@ -116,55 +190,9 @@
 
               <div class="mrow__right">
                 <span class="mrow__rank" :class="'rank-' + Math.min(idx + 1, 4)">#{{ idx + 1 }}</span>
-                <button class="mrow__btn" :class="{ 'mrow__btn--open': expandedId === m.id }" @click="toggleDetails(m)">
-                  <span v-if="loadingMemberId === m.id" class="sp-spinner sp-spinner--sm"></span>
-                  <span v-else>{{ expandedId === m.id ? "▲ Close" : "▼ Details" }}</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Deposit history panel -->
-            <div v-if="expandedId === m.id" class="history">
-              <div class="history__title">📋 Deposit History — {{ m.name }}</div>
-              <div v-if="!depositHistory.length" class="history__empty">No deposits found.</div>
-              <div v-else class="history__table-wrap">
-                <table class="history__table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Voucher</th>
-                      <th>Type</th>
-                      <th>Amount</th>
-                      <th>For Month</th>
-                      <th>Payment Date</th>
-                      <th>Method</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(d, di) in depositHistory" :key="di">
-                      <td>{{ di + 1 }}</td>
-                      <td class="mono">{{ d.voucher_no || "—" }}</td>
-                      <td>
-                        <span class="pill pill--sm" :class="d.deposit_type === 'share_deposit' ? 'pill--purple' : 'pill--green'">
-                          {{ d.deposit_type === "share_deposit" ? "Share" : "Extra" }}
-                        </span>
-                      </td>
-                      <td class="amount">৳ {{ fmt(d.amount) }}</td>
-                      <td>{{ fmtMonth(d.for_month) }}</td>
-                      <td>{{ fmtDate(d.payment_date) }}</td>
-                      <td>{{ d.payment_method || "—" }}</td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr class="history__total">
-                      <td colspan="3"><strong>Total</strong></td>
-                      <td class="amount">
-                        <strong>৳ {{ fmt(depositHistory.reduce((s, d) => s + parseFloat(d.amount || 0), 0)) }}</strong>
-                      </td>
-                      <td colspan="3"></td>
-                    </tr>
-                  </tfoot>
-                </table>
+                <Link :href="'/member/' + m.id" class="mrow__btn">
+                  <i class="fas fa-eye"></i> Details
+                </Link>
               </div>
             </div>
           </div>
@@ -176,6 +204,125 @@
             <span class="pill pill--purple">Share ৳{{ fmt(totalShare) }}</span>
             <span class="pill pill--green">Extra ৳{{ fmt(totalSavings) }}</span>
             <span class="pill pill--red">Due ৳{{ fmt(totalDue) }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ═══════════════════════════════════════════
+         ABOUT
+    ════════════════════════════════════════════════ -->
+    <section id="about" class="info-section">
+      <div class="info-section__inner">
+        <div class="info-section__header">
+          <span class="info-section__badge">আমাদের সম্পর্কে</span>
+          <h2 class="info-section__title">About Us</h2>
+          <p class="info-section__sub">{{ siteName }} একটি সদস্য-ভিত্তিক সঞ্চয় ও বিনিয়োগ সংগঠন যেখানে প্রতিটি সদস্য একে অপরের আর্থিক উন্নয়নে অবদান রাখে।</p>
+        </div>
+        <div class="info-cards">
+          <div class="info-card">
+            <div class="info-card__icon">🏦</div>
+            <h3 class="info-card__title">আমরা কারা</h3>
+            <p class="info-card__text">আমরা একটি বিশ্বস্ত সঞ্চয় সংগঠন। আমাদের লক্ষ্য সদস্যদের মধ্যে আর্থিক সচেতনতা তৈরি করা এবং সঞ্চয়ের মাধ্যমে ভবিষ্যৎ নিরাপদ করা।</p>
+          </div>
+          <div class="info-card">
+            <div class="info-card__icon">🤝</div>
+            <h3 class="info-card__title">আমাদের দর্শন</h3>
+            <p class="info-card__text">পারস্পরিক সহযোগিতা ও আস্থার উপর ভিত্তি করে আমরা প্রতিটি সদস্যের আর্থিক স্বাধীনতা নিশ্চিত করতে প্রতিশ্রুতিবদ্ধ।</p>
+          </div>
+          <div class="info-card">
+            <div class="info-card__icon">📊</div>
+            <h3 class="info-card__title">স্বচ্ছতা</h3>
+            <p class="info-card__text">প্রতিটি লেনদেন ডিজিটালভাবে সংরক্ষিত এবং সকল সদস্যের কাছে সম্পূর্ণ স্বচ্ছ ও অ্যাক্সেসযোগ্য।</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         OBJECTIVES
+    ════════════════════════════════════════════════ -->
+    <section id="objectives" class="info-section info-section--alt">
+      <div class="info-section__inner">
+        <div class="info-section__header">
+          <span class="info-section__badge">আমাদের লক্ষ্য</span>
+          <h2 class="info-section__title">Objectives</h2>
+          <p class="info-section__sub">আমাদের সংগঠনের মূল উদ্দেশ্য সমূহ যা আমাদের কার্যক্রম পরিচালনার মূল ভিত্তি।</p>
+        </div>
+        <div class="objectives-list">
+          <div class="obj-item">
+            <div class="obj-item__num">০১</div>
+            <div class="obj-item__body">
+              <h4 class="obj-item__title">নিয়মিত সঞ্চয়ের অভ্যাস তৈরি</h4>
+              <p class="obj-item__text">প্রতিটি সদস্যকে নিয়মিত সঞ্চয়ের অভ্যাস গড়ে তুলতে উৎসাহিত করা এবং আর্থিক শৃঙ্খলা প্রতিষ্ঠা করা।</p>
+            </div>
+          </div>
+          <div class="obj-item">
+            <div class="obj-item__num">০২</div>
+            <div class="obj-item__body">
+              <h4 class="obj-item__title">সদস্যদের আর্থিক নিরাপত্তা</h4>
+              <p class="obj-item__text">সদস্যদের জমানো অর্থ সুরক্ষিত রাখা এবং প্রয়োজনে উপযুক্ত বিনিয়োগের মাধ্যমে লাভজনক রিটার্ন নিশ্চিত করা।</p>
+            </div>
+          </div>
+          <div class="obj-item">
+            <div class="obj-item__num">০৩</div>
+            <div class="obj-item__body">
+              <h4 class="obj-item__title">পারস্পরিক সহযোগিতা</h4>
+              <p class="obj-item__text">সদস্যদের মধ্যে বন্ধুত্বপূর্ণ সম্পর্ক তৈরি করা এবং পরস্পরের সমস্যায় সহায়তা করার মানসিকতা গড়ে তোলা।</p>
+            </div>
+          </div>
+          <div class="obj-item">
+            <div class="obj-item__num">০৪</div>
+            <div class="obj-item__body">
+              <h4 class="obj-item__title">ডিজিটাল ও স্বচ্ছ ব্যবস্থাপনা</h4>
+              <p class="obj-item__text">প্রযুক্তির সাহায্যে সকল আর্থিক কার্যক্রম ডিজিটালভাবে পরিচালনা করা এবং সকলের কাছে হিসাব-নিকাশ স্বচ্ছ রাখা।</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         TERMS & CONDITION
+    ════════════════════════════════════════════════ -->
+    <section id="terms" class="info-section">
+      <div class="info-section__inner">
+        <div class="info-section__header">
+          <span class="info-section__badge">নিয়মাবলী</span>
+          <h2 class="info-section__title">Terms &amp; Condition</h2>
+          <p class="info-section__sub">সংগঠনের সদস্যপদ ও কার্যক্রমের সাথে সম্পর্কিত গুরুত্বপূর্ণ শর্তাবলী।</p>
+        </div>
+        <div class="terms-grid">
+          <div class="terms-card">
+            <h4 class="terms-card__title"><span class="terms-card__icon">📌</span> সদস্যপদ</h4>
+            <ul class="terms-card__list">
+              <li>সদস্যপদ গ্রহণের জন্য কমিটির অনুমোদন আবশ্যক।</li>
+              <li>প্রতিটি সদস্যকে নির্ধারিত নিয়মকানুন মেনে চলতে হবে।</li>
+              <li>সদস্যপদ হস্তান্তরযোগ্য নয়।</li>
+            </ul>
+          </div>
+          <div class="terms-card">
+            <h4 class="terms-card__title"><span class="terms-card__icon">💳</span> জমা ও উত্তোলন</h4>
+            <ul class="terms-card__list">
+              <li>প্রতি মাসে নির্ধারিত তারিখের মধ্যে জমা দিতে হবে।</li>
+              <li>উত্তোলনের জন্য কমিটির পূর্বানুমতি প্রয়োজন।</li>
+              <li>বিলম্বে জমার ক্ষেত্রে জরিমানা প্রযোজ্য হতে পারে।</li>
+            </ul>
+          </div>
+          <div class="terms-card">
+            <h4 class="terms-card__title"><span class="terms-card__icon">⚖️</span> দায়িত্ব ও অধিকার</h4>
+            <ul class="terms-card__list">
+              <li>প্রতিটি সদস্যের তাদের জমানো অর্থের উপর পূর্ণ অধিকার রয়েছে।</li>
+              <li>সভায় অংশগ্রহণ করা প্রতিটি সদস্যের দায়িত্ব।</li>
+              <li>সিদ্ধান্ত গ্রহণে সকল সদস্যের সমান ভোটাধিকার রয়েছে।</li>
+            </ul>
+          </div>
+          <div class="terms-card">
+            <h4 class="terms-card__title"><span class="terms-card__icon">🔒</span> গোপনীয়তা</h4>
+            <ul class="terms-card__list">
+              <li>সদস্যদের ব্যক্তিগত তথ্য সম্পূর্ণ গোপনীয় রাখা হবে।</li>
+              <li>আর্থিক তথ্য শুধুমাত্র সংশ্লিষ্ট সদস্যকে প্রদান করা হবে।</li>
+              <li>তৃতীয় পক্ষের সাথে তথ্য শেয়ার করা হবে না।</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -207,9 +354,6 @@ export default {
       loading: true,
       org: { net_fund: 0, total_deposits: 0, total_withdrawals: 0, total_income: 0, total_expense: 0, total_members: 0 },
       members: [],
-      expandedId: null,
-      depositHistory: [],
-      loadingMemberId: null,
     };
   },
   computed: {
@@ -230,24 +374,30 @@ export default {
     },
   },
   async mounted() {
-    // Add scroll animation observer
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-          }
-        });
-      },
+    const animObserver = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("is-visible"); }),
       { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
     );
-
     setTimeout(() => {
       document.querySelectorAll(".animate-on-scroll, .section-title, .section-sub, .service-card, .about-stat, .tcard").forEach((el) => {
         el.classList.add("animate-on-scroll");
-        observer.observe(el);
+        animObserver.observe(el);
       });
     }, 100);
+
+    // Handle scroll target set by header when navigating from sub-pages
+    const target = sessionStorage.getItem('scrollTarget');
+    if (target) {
+      sessionStorage.removeItem('scrollTarget');
+      setTimeout(() => {
+        if (target === 'contact') {
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        } else {
+          const el = document.getElementById(target);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
+    }
   },
   async created() {
     site_settings_store().get_all_website_settings();
@@ -262,25 +412,6 @@ export default {
     }
   },
   methods: {
-    async toggleDetails(m) {
-      if (this.expandedId === m.id) {
-        this.expandedId = null;
-        this.depositHistory = [];
-        return;
-      }
-      this.loadingMemberId = m.id;
-      this.expandedId = null;
-      this.depositHistory = [];
-      try {
-        const res = await axios.get(`${location.origin}/api/public/member/${m.id}/deposits`);
-        this.depositHistory = res.data.data.deposits;
-        this.expandedId = m.id;
-      } catch (e) {
-        console.error(e);
-      } finally {
-        this.loadingMemberId = null;
-      }
-    },
     fmt(v) {
       return Number(v || 0).toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     },
@@ -303,6 +434,16 @@ export default {
     avatarColor(i) {
       return COLORS[i % COLORS.length];
     },
+    imgUrl(path) {
+      if (!path) return null;
+      if (/^https?:\/\//.test(path) || path.startsWith('/')) return path;
+      return '/' + path;
+    },
+    scrollTo(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      this.activeSection = id;
+    },
   },
 };
 </script>
@@ -319,23 +460,63 @@ export default {
 .hero {
   position: relative;
   width: 100%;
-  padding: 60px 24px 0;
+  padding: 72px 0px 0;
+  overflow: hidden;
   background:
-    linear-gradient(160deg, rgba(5, 8, 20, 0.82) 0%, rgba(10, 18, 45, 0.76) 100%),
+    linear-gradient(160deg, rgba(3, 6, 18, 0.94) 0%, rgba(8, 14, 38, 0.90) 100%),
     url("/frontend/asset/img/home_page/banner.png") center/cover no-repeat;
   color: #e2e8f0;
 }
 
-.hero__bg,
+/* Animated floating orbs */
+.hero__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: 0.35;
+}
+.hero__orb--1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #6366f1, transparent 70%);
+  top: -150px; left: -100px;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.hero__orb--2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #10b981, transparent 70%);
+  top: 50px; right: -80px;
+  animation: orbFloat 10s ease-in-out infinite reverse;
+}
+.hero__orb--3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, #8b5cf6, transparent 70%);
+  bottom: 80px; left: 30%;
+  animation: orbFloat 7s ease-in-out infinite 2s;
+}
+.hero__orb--4 {
+  width: 250px; height: 250px;
+  background: radial-gradient(circle, #14b8a6, transparent 70%);
+  bottom: 40px; right: 25%;
+  animation: orbFloat 9s ease-in-out infinite 1s reverse;
+}
+
+/* Dot-grid texture */
+.hero__grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
 .hero__overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
-}
-.hero__overlay {
   background:
-    radial-gradient(ellipse at 10% 50%, rgba(99, 102, 241, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse at 90% 50%, rgba(16, 185, 129, 0.13) 0%, transparent 55%);
+    radial-gradient(ellipse at 15% 50%, rgba(99,102,241,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 40%, rgba(16,185,129,0.10) 0%, transparent 50%);
 }
 
 .hero__content {
@@ -345,141 +526,394 @@ export default {
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 48px;
-  padding-bottom: 80px;
+  gap: 56px;
+  padding-bottom: 100px;
 }
 
-/* Identity */
+/* ── Identity ──────────────────────────────────────────────────── */
 .hero__identity {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  min-width: 170px;
+  gap: 0;
+  min-width: 200px;
+  animation: fadeSlideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.hero__logo-ring {
-  width: 130px;
-  height: 130px;
+
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 16px;
+  background: rgba(99,102,241,0.10);
+  border: 1px solid rgba(99,102,241,0.35);
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a5b4fc;
+  letter-spacing: 0.6px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+.hero__badge-pulse {
+  display: inline-block;
+  width: 7px; height: 7px;
   border-radius: 50%;
-  border: 3px solid rgba(99, 102, 241, 0.55);
-  box-shadow: 0 0 40px rgba(99, 102, 241, 0.28);
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.07);
+  background: #34d399;
+  box-shadow: 0 0 0 0 rgba(52,211,153,0.6);
+  animation: badgePulse 1.8s ease-out infinite;
+}
+
+/* Logo rings */
+.hero__logo-wrap {
+  position: relative;
+  width: 150px; height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 22px;
+}
+.hero__logo-ring-spin {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(99,102,241,0.7);
+  border-right-color: rgba(16,185,129,0.5);
+  animation: spinRing 4s linear infinite;
+}
+.hero__logo-ring-spin--rev {
+  inset: -14px;
+  border-top-color: rgba(139,92,246,0.5);
+  border-right-color: transparent;
+  border-bottom-color: rgba(16,185,129,0.4);
+  animation-duration: 6s;
+  animation-direction: reverse;
+}
+.hero__logo-ring {
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(99,102,241,0.4);
+  box-shadow:
+    0 0 40px rgba(99,102,241,0.22),
+    0 0 80px rgba(99,102,241,0.10),
+    inset 0 0 30px rgba(99,102,241,0.08);
 }
 .hero__logo-img {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   object-fit: cover;
 }
 .hero__logo-text {
-  font-size: 36px;
-  font-weight: 800;
-  color: #a5b4fc;
-}
-.hero__name {
-  font-size: 24px;
-  font-weight: 800;
-  text-align: center;
+  font-size: 44px;
+  font-weight: 900;
   background: linear-gradient(135deg, #a5b4fc, #34d399);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.hero__slogan {
-  font-size: 16px;
-  color: #eaeaea;
-  letter-spacing: 1px;
-  font-weight: bolder;
+
+.hero__name {
+  font-size: 28px;
+  font-weight: 900;
+  text-align: center;
+  margin: 0 0 10px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #a5b4fc 40%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 16px rgba(99,102,241,0.4));
+  letter-spacing: 0.5px;
 }
 
-/* Stats grid */
+.hero__slogan-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.hero__slogan-sep {
+  display: inline-block;
+  width: 28px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.5));
+}
+.hero__slogan-row .hero__slogan-sep:last-child {
+  background: linear-gradient(90deg, rgba(99,102,241,0.5), transparent);
+}
+.hero__slogan {
+  font-size: 13px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.hero__desc {
+  font-size: 13.5px;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.75;
+  margin: 0 0 24px;
+}
+
+.hero__cta-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+.hero__cta--primary {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+}
+.hero__cta--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(99,102,241,0.5);
+}
+.hero__cta--outline {
+  background: transparent;
+  border: 1px solid rgba(99,102,241,0.4);
+  color: #a5b4fc;
+}
+.hero__cta--outline:hover {
+  background: rgba(99,102,241,0.12);
+  border-color: rgba(99,102,241,0.65);
+  transform: translateY(-2px);
+}
+
+/* ── Stats grid ────────────────────────────────────────────────── */
 .hero__stats {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+  gap: 16px;
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
-  padding: 26px 22px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 22px 20px 18px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  backdrop-filter: blur(14px);
-  transition: transform 0.2s;
+  gap: 6px;
+  backdrop-filter: blur(20px);
+  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s, border-color 0.3s;
+  animation: fadeSlideUp 0.6s cubic-bezier(0.22,1,0.36,1) both;
 }
+.stat-card:nth-child(1) { animation-delay: 0.10s; }
+.stat-card:nth-child(2) { animation-delay: 0.18s; }
+.stat-card:nth-child(3) { animation-delay: 0.26s; }
+.stat-card:nth-child(4) { animation-delay: 0.34s; }
+.stat-card:nth-child(5) { animation-delay: 0.42s; }
+.stat-card:nth-child(6) { animation-delay: 0.50s; }
+
 .stat-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-6px) scale(1.02);
 }
-.stat-card__icon {
-  font-size: 26px;
-  font-style: normal;
+
+/* Top colored accent bar */
+.stat-card__accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 20px 20px 0 0;
 }
+
+/* Shimmer sweep on hover */
+.stat-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  transition: left 0.5s;
+}
+.stat-card:hover::after { left: 150%; }
+
+.stat-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.stat-card__icon-wrap {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+}
+.stat-card__trend {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.stat-card__trend--up   { background: rgba(16,185,129,0.12); color: #34d399; }
+.stat-card__trend--down { background: rgba(239,68,68,0.12);  color: #f87171; }
+
 .stat-card__label {
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #64748b;
+  letter-spacing: 0.9px;
+  color: #475569;
+  font-weight: 600;
 }
 .stat-card__value {
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 900;
+  letter-spacing: -0.3px;
 }
 
+/* Progress bar at bottom */
+.stat-card__bar {
+  margin-top: 10px;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.stat-card__bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  width: 0;
+  animation: barGrow 1.2s cubic-bezier(0.22,1,0.36,1) forwards 0.8s;
+}
+
+/* Per-colour theming */
 .stat-card--green {
-  border-color: rgba(16, 185, 129, 0.4);
+  border-color: rgba(16,185,129,0.22);
 }
-.stat-card--green .stat-card__value {
-  color: #34d399;
-}
-.stat-card--blue {
-  border-color: rgba(59, 130, 246, 0.4);
-}
-.stat-card--blue .stat-card__value {
-  color: #60a5fa;
-}
-.stat-card--purple {
-  border-color: rgba(139, 92, 246, 0.4);
-}
-.stat-card--purple .stat-card__value {
-  color: #a78bfa;
-}
-.stat-card--orange {
-  border-color: rgba(245, 158, 11, 0.4);
-}
-.stat-card--orange .stat-card__value {
-  color: #fbbf24;
-}
-.stat-card--red {
-  border-color: rgba(239, 68, 68, 0.4);
-}
-.stat-card--red .stat-card__value {
-  color: #f87171;
-}
-.stat-card--teal {
-  border-color: rgba(20, 184, 166, 0.4);
-}
-.stat-card--teal .stat-card__value {
-  color: #2dd4bf;
-}
+.stat-card--green:hover { box-shadow: 0 12px 40px rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.45); }
+.stat-card--green .stat-card__accent   { background: linear-gradient(90deg,#10b981,#34d399); }
+.stat-card--green .stat-card__icon-wrap{ background: rgba(16,185,129,0.12); color: #34d399; }
+.stat-card--green .stat-card__value    { color: #34d399; }
+.stat-card--green .stat-card__bar-fill { background: linear-gradient(90deg,#10b981,#34d399); width: 78%; }
 
-/* Wave */
+.stat-card--blue {
+  border-color: rgba(59,130,246,0.22);
+}
+.stat-card--blue:hover { box-shadow: 0 12px 40px rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.45); }
+.stat-card--blue .stat-card__accent   { background: linear-gradient(90deg,#3b82f6,#60a5fa); }
+.stat-card--blue .stat-card__icon-wrap{ background: rgba(59,130,246,0.12); color: #60a5fa; }
+.stat-card--blue .stat-card__value    { color: #60a5fa; }
+.stat-card--blue .stat-card__bar-fill { background: linear-gradient(90deg,#3b82f6,#60a5fa); width: 85%; }
+
+.stat-card--purple {
+  border-color: rgba(139,92,246,0.22);
+}
+.stat-card--purple:hover { box-shadow: 0 12px 40px rgba(139,92,246,0.18); border-color: rgba(139,92,246,0.45); }
+.stat-card--purple .stat-card__accent   { background: linear-gradient(90deg,#8b5cf6,#a78bfa); }
+.stat-card--purple .stat-card__icon-wrap{ background: rgba(139,92,246,0.12); color: #a78bfa; }
+.stat-card--purple .stat-card__value    { color: #a78bfa; }
+.stat-card--purple .stat-card__bar-fill { background: linear-gradient(90deg,#8b5cf6,#a78bfa); width: 65%; }
+
+.stat-card--orange {
+  border-color: rgba(245,158,11,0.22);
+}
+.stat-card--orange:hover { box-shadow: 0 12px 40px rgba(245,158,11,0.18); border-color: rgba(245,158,11,0.45); }
+.stat-card--orange .stat-card__accent   { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+.stat-card--orange .stat-card__icon-wrap{ background: rgba(245,158,11,0.12); color: #fbbf24; }
+.stat-card--orange .stat-card__value    { color: #fbbf24; }
+.stat-card--orange .stat-card__bar-fill { background: linear-gradient(90deg,#f59e0b,#fbbf24); width: 52%; }
+
+.stat-card--red {
+  border-color: rgba(239,68,68,0.22);
+}
+.stat-card--red:hover { box-shadow: 0 12px 40px rgba(239,68,68,0.18); border-color: rgba(239,68,68,0.45); }
+.stat-card--red .stat-card__accent   { background: linear-gradient(90deg,#ef4444,#f87171); }
+.stat-card--red .stat-card__icon-wrap{ background: rgba(239,68,68,0.12); color: #f87171; }
+.stat-card--red .stat-card__value    { color: #f87171; }
+.stat-card--red .stat-card__bar-fill { background: linear-gradient(90deg,#ef4444,#f87171); width: 40%; }
+
+.stat-card--teal {
+  border-color: rgba(20,184,166,0.22);
+}
+.stat-card--teal:hover { box-shadow: 0 12px 40px rgba(20,184,166,0.18); border-color: rgba(20,184,166,0.45); }
+.stat-card--teal .stat-card__accent   { background: linear-gradient(90deg,#14b8a6,#2dd4bf); }
+.stat-card--teal .stat-card__icon-wrap{ background: rgba(20,184,166,0.12); color: #2dd4bf; }
+.stat-card--teal .stat-card__value    { color: #2dd4bf; }
+.stat-card--teal .stat-card__bar-fill { background: linear-gradient(90deg,#14b8a6,#2dd4bf); width: 70%; }
+
+/* ─── Wave ───────────────────────────────────────────────────── */
 .hero__wave {
   position: relative;
   width: 100%;
+  height: 130px;
   line-height: 0;
+  overflow: hidden;
 }
-.hero__wave svg {
-  display: block;
-  width: 100%;
-  height: 80px;
+.wl {
+    position: absolute;
+    bottom: -40px;
+    left: -20px;
+    width: 120%;
+    height: 170px;
+}
+.wl--1  { animation: waveShift1 7s ease-in-out infinite; z-index: 1; }
+.wl--2  { animation: waveShift2 9s ease-in-out infinite; z-index: 2; }
+.wl--3  { animation: waveShift3 5s ease-in-out infinite; z-index: 3; }
+.wl--base { z-index: 4; }
+
+@keyframes waveShift1 {
+  0%, 100% { transform: translateX(0px) scaleX(1); }
+  50%       { transform: translateX(-35px) scaleX(1.03); }
+}
+@keyframes waveShift2 {
+  0%, 100% { transform: translateX(0px) scaleX(1); }
+  50%       { transform: translateX(28px) scaleX(1.02); }
+}
+@keyframes waveShift3 {
+  0%, 100% { transform: translateX(0px) scaleX(1); }
+  50%       { transform: translateX(-18px) scaleX(1.01); }
+}
+
+/* ─── KEYFRAMES ──────────────────────────────────────────────── */
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(30px, -40px) scale(1.05); }
+  66%       { transform: translate(-20px, 20px) scale(0.97); }
+}
+@keyframes spinRing {
+  to { transform: rotate(360deg); }
+}
+@keyframes badgePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(52,211,153,0); }
+  100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes barGrow {
+  from { width: 0; }
 }
 
 /* ─── MEMBERS ────────────────────────────────────────────────── */
@@ -673,65 +1107,7 @@ export default {
   border-color: rgba(99, 102, 241, 0.6);
 }
 
-/* Deposit history panel */
-.history {
-  background: rgba(16, 185, 129, 0.05);
-  border: 1px solid rgba(16, 185, 129, 0.18);
-  border-radius: 12px;
-  padding: 20px 22px 24px;
-  margin-bottom: 10px;
-  margin-top: -4px;
-}
-.history__title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #34d399;
-  margin-bottom: 16px;
-}
-.history__empty {
-  color: #475569;
-  font-size: 13px;
-  padding: 12px 0;
-}
-.history__table-wrap {
-  overflow-x: auto;
-}
-.history__table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  color: #cbd5e1;
-}
-.history__table th {
-  padding: 9px 13px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #64748b;
-  text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(16, 185, 129, 0.08);
-}
-.history__table td {
-  padding: 10px 13px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-.history__table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
-}
-.history__total td {
-  background: rgba(255, 255, 255, 0.04);
-  border-top: 2px solid rgba(16, 185, 129, 0.3);
-}
-.mono {
-  font-family: monospace;
-  font-size: 12px;
-  color: #94a3b8;
-}
-.amount {
-  color: #60a5fa;
-  font-weight: 600;
-}
+/* (deposit history panel moved to MemberDetail page) */
 
 /* Grand total bar */
 .members__total {
@@ -948,35 +1324,210 @@ export default {
 }
 
 /* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .hero__stats { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 900px) {
   .hero__content {
     flex-direction: column;
-    gap: 32px;
-    padding-bottom: 60px;
+    gap: 36px;
+    padding-bottom: 72px;
   }
+  .hero__identity { min-width: unset; width: 100%; }
   .hero__stats {
     grid-template-columns: repeat(3, 1fr);
     width: 100%;
   }
-  .mrow {
-    flex-wrap: wrap;
-  }
-  .mrow__info {
-    min-width: auto;
-  }
+  .mrow { flex-wrap: wrap; }
+  .mrow__info { min-width: auto; }
 }
-@media (max-width: 560px) {
-  .hero__stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .mrow__pills {
-    gap: 5px;
-  }
-  .hero {
-    padding: 40px 16px 0;
-  }
-  .members {
-    padding: 32px 16px 48px;
-  }
+@media (max-width: 640px) {
+  .hero__stats { grid-template-columns: repeat(2, 1fr); }
+  .mrow__pills { gap: 5px; }
+  .hero { padding: 48px 16px 0; }
+  .members { padding: 32px 16px 48px; }
+  .hero__name { font-size: 22px; }
+  .stat-card__value { font-size: 18px; }
+}
+
+
+/* ─── INFO SECTIONS ──────────────────────────────────────────── */
+.info-section {
+  background: #0d1320;
+  padding: 72px 24px;
+}
+.info-section--alt {
+  background: #0a0f1d;
+}
+.info-section__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.info-section__header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.info-section__badge {
+  display: inline-block;
+  padding: 5px 16px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #a5b4fc;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
+.info-section__title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0 0 12px;
+  background: linear-gradient(135deg, #a5b4fc, #34d399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.info-section__sub {
+  font-size: 15px;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.75;
+}
+
+/* About cards */
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.info-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 32px 28px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.info-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+.info-card__icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 16px;
+}
+.info-card__title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 10px;
+}
+.info-card__text {
+  font-size: 13.5px;
+  color: #64748b;
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* Objectives list */
+.objectives-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.obj-item {
+  display: flex;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 28px 24px;
+  transition: border-color 0.2s;
+}
+.obj-item:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.obj-item__num {
+  font-size: 28px;
+  font-weight: 900;
+  color: rgba(16, 185, 129, 0.25);
+  flex-shrink: 0;
+  line-height: 1;
+}
+.obj-item__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 8px;
+}
+.obj-item__text {
+  font-size: 13.5px;
+  color: #64748b;
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* Terms grid */
+.terms-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.terms-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 28px 24px;
+  transition: border-color 0.2s;
+}
+.terms-card:hover {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.terms-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.terms-card__icon {
+  font-style: normal;
+}
+.terms-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.terms-card__list li {
+  font-size: 13.5px;
+  color: #64748b;
+  line-height: 1.6;
+  padding-left: 16px;
+  position: relative;
+}
+.terms-card__list li::before {
+  content: "›";
+  position: absolute;
+  left: 0;
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .info-cards { grid-template-columns: 1fr; }
+  .objectives-list { grid-template-columns: 1fr; }
+  .terms-grid { grid-template-columns: 1fr; }
+  .info-section { padding: 48px 20px; }
+}
+@media (max-width: 540px) {
+  .info-section__title { font-size: 24px; }
 }
 </style>

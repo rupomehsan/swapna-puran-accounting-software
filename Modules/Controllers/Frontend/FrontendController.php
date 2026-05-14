@@ -12,9 +12,43 @@ class FrontendController extends Controller
     public function HomePage()
     {
         return Inertia::render('HomePage/Index', [
-            'event' => [
-                'title' => 'Login Page',
-            ]
+            'event' => ['title' => 'Home'],
+        ]);
+    }
+
+    public function TransactionLogPage()
+    {
+        return Inertia::render('TransactionLog/Index', [
+            'event' => ['title' => 'Transaction Log'],
+        ]);
+    }
+
+    public function IncomePage()
+    {
+        return Inertia::render('Income/Index', [
+            'event' => ['title' => 'Income'],
+        ]);
+    }
+
+    public function ExpensePage()
+    {
+        return Inertia::render('Expense/Index', [
+            'event' => ['title' => 'Expense'],
+        ]);
+    }
+
+    public function BalanceSheetPage()
+    {
+        return Inertia::render('BalanceSheet/Index', [
+            'event' => ['title' => 'Balance Sheet'],
+        ]);
+    }
+
+    public function MemberDetailPage($id)
+    {
+        return Inertia::render('MemberDetail/Index', [
+            'event'    => ['title' => 'Member Detail'],
+            'memberId' => (int) $id,
         ]);
     }
     public function VocabularyPage()

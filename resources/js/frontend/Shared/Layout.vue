@@ -1,6 +1,7 @@
 <template>
  
     <Header />
+    <div class="header-spacer"></div>
     <main class="main-wrapper">
       <slot />
     </main>
@@ -25,6 +26,7 @@ html, body {
   overflow-y: auto !important;
   overflow-x: hidden;
   height: auto !important;
+  background: #080c18;
 }
 
 #app {
@@ -32,6 +34,11 @@ html, body {
   flex-direction: column;
   min-height: 100vh;
   overflow: visible !important;
+}
+
+.header-spacer {
+  height: 66px;
+  flex-shrink: 0;
 }
 
 .main-wrapper {
