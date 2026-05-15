@@ -56,9 +56,10 @@
         :icon="`fa fa-money`"
         :menu_title="`Member Finance`"
         :menus="[
-          { route_name: 'AllDeposit',    title: 'Deposits',     icon: 'fa fa-arrow-circle-down' },
-          { route_name: 'AllDue',        title: 'Due',          icon: 'fa fa-clock-o'           },
-          { route_name: 'AllWithdrawal', title: 'Withdrawals',  icon: 'fa fa-arrow-circle-up'   },
+          { route_name: 'AllDeposit',          title: 'Deposits',          icon: 'fa fa-arrow-circle-down' },
+          { route_name: 'AllDue',              title: 'Due',               icon: 'fa fa-clock-o'           },
+          { route_name: 'AllWithdrawal',       title: 'Withdrawals',       icon: 'fa fa-arrow-circle-up'   },
+          { route_name: 'AllShareAdjustment',  title: 'Share Adjustment',  icon: 'fa fa-exchange'          },
         ]"
       />
       <side-bar-drop-down-menus

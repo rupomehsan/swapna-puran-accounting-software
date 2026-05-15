@@ -31,32 +31,49 @@ class GetMemberDetail
             $totalShare   = $deposits->filter(fn($d) => $d->deposit_type === 'share_deposit')->sum(fn($d) => (float) $d->amount);
             $totalSavings = $deposits->filter(fn($d) => $d->deposit_type === 'extra_savings')->sum(fn($d) => (float) $d->amount);
 
-            // Config-based due calculation
-            $config     = DB::table('configurations')->whereNull('deleted_at')->where('status', 'active')->orderByDesc('updated_at')->first();
-            $sharePrice = $config ? (float) $config->share_price : 0;
-            $startDate  = $config ? new \DateTime($config->start_date) : null;
+            // Due from dues table (snapshots historical share count per month)
+            $totalDue = (float) DB::table('dues')
+                ->where('user_id', $userId)
+                ->whereNull('deleted_at')
+                ->whereIn('payment_status', ['unpaid', 'partial'])
+                ->sum('remaining_amount');
 
-            $monthsPassed = 0;
-            if ($startDate) {
-                $startMonth   = \DateTime::createFromFormat('Y-m-d', $startDate->format('Y-m-01'));
-                $currentMonth = new \DateTime('first day of this month');
-                if ($currentMonth >= $startMonth) {
-                    $diff         = $startMonth->diff($currentMonth);
-                    $monthsPassed = $diff->y * 12 + $diff->m + 1; // inclusive
+            // Latest contiguous paid-through month
+            $paidTill = null;
+            $userDues = DB::table('dues')
+                ->where('user_id', $userId)
+                ->whereNull('deleted_at')
+                ->orderBy('for_month', 'asc')
+                ->get(['for_month', 'payment_status']);
+            foreach ($userDues as $d) {
+                if ($d->payment_status === 'paid') {
+                    $paidTill = $d->for_month;
+                } else {
+                    break;
                 }
             }
 
-            $expected = $monthsPassed * $member->number_of_share * $sharePrice;
-            $totalDue = max(0, $expected - $totalShare);
+            // Latest share adjustment (for direction indicator)
+            $lastAdjustment = null;
+            if (\Illuminate\Support\Facades\Schema::hasTable('share_adjustments')) {
+                $lastAdjustment = DB::table('share_adjustments')
+                    ->where('user_id', $userId)
+                    ->whereNull('deleted_at')
+                    ->where('status', 'active')
+                    ->orderByDesc('id')
+                    ->first(['adjustment_type', 'from_shares', 'to_shares', 'shares_delta', 'created_at']);
+            }
 
             return entityResponse([
                 'member'  => $member,
                 'stats'   => [
-                    'total_deposit' => $totalDeposit,
-                    'total_share'   => $totalShare,
-                    'total_savings' => $totalSavings,
-                    'total_due'     => $totalDue,
-                    'deposit_count' => $deposits->count(),
+                    'total_deposit'   => $totalDeposit,
+                    'total_share'     => $totalShare,
+                    'total_savings'   => $totalSavings,
+                    'total_due'       => $totalDue,
+                    'deposit_count'   => $deposits->count(),
+                    'paid_till'       => $paidTill,
+                    'last_adjustment' => $lastAdjustment,
                 ],
                 'deposits' => $deposits,
             ]);

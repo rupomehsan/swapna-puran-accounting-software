@@ -4,10 +4,12 @@ namespace Modules\Management\Deposit\Actions;
 
 use Illuminate\Support\Facades\DB;
 use Modules\Helpers\Services\TransactionLogService;
+use Modules\Management\Due\Actions\StoreData as DueStoreData;
 
 class UpdateData
 {
-    static $model = \Modules\Management\Deposit\Database\Models\Model::class;
+    static $model    = \Modules\Management\Deposit\Database\Models\Model::class;
+    static $dueModel = \Modules\Management\Due\Database\Models\Model::class;
 
     public static function execute($request, $slug)
     {
@@ -23,26 +25,36 @@ class UpdateData
                 $requestData['image'] = uploader(request()->file('image'), 'uploads/deposits');
             }
 
-            $oldAmount  = (float) $deposit->amount;
-            $oldDueId   = $deposit->due_id;
-            $newAmount  = isset($requestData['amount']) ? (float) $requestData['amount'] : $oldAmount;
-            $newForMonth = $requestData['for_month'] ?? $deposit->for_month;
-            $newUserId   = $requestData['user_id']   ?? $deposit->user_id;
-
-            $amountChanged   = $newAmount   !== $oldAmount;
-            $monthChanged    = $newForMonth !== $deposit->for_month;
-            $memberChanged   = $newUserId   != $deposit->user_id;
-            $needsDueRefresh = $amountChanged || $monthChanged || $memberChanged;
+            $oldUserId = $deposit->user_id;
+            $oldAmount = (float) $deposit->amount;
 
             DB::beginTransaction();
 
-            // Reverse old due if anything affecting it changed
-            if ($needsDueRefresh && $oldDueId) {
-                StoreData::updateDue($oldDueId, $oldAmount, 'reverse');
+            $deposit->update($requestData);
+            $deposit->refresh();
+
+            // Re-reconcile both old and new user if member changed
+            if ($deposit->deposit_type === 'share_deposit' || $oldUserId !== $deposit->user_id) {
+                DueStoreData::reconcileMember($oldUserId);
+                if ($oldUserId !== $deposit->user_id) {
+                    DueStoreData::reconcileMember($deposit->user_id);
+                }
+
+                // Refresh due_id link
+                if ($deposit->for_month) {
+                    $monthDue = self::$dueModel::where('user_id', $deposit->user_id)
+                        ->whereYear('for_month',  date('Y', strtotime($deposit->for_month)))
+                        ->whereMonth('for_month', date('m', strtotime($deposit->for_month)))
+                        ->whereNull('deleted_at')
+                        ->first();
+                    $deposit->due_id = $monthDue?->id;
+                    $deposit->save();
+                }
             }
 
-            // Reversal transaction log entry
-            if ($needsDueRefresh) {
+            // Transaction log: reversal + new entry (only if amount/member changed)
+            $newAmount = (float) $deposit->amount;
+            if ($oldAmount != $newAmount || $oldUserId != $deposit->user_id) {
                 $cashAccountId    = TransactionLogService::accountId('1000');
                 $capitalAccountId = TransactionLogService::accountId('2000');
 
@@ -51,7 +63,7 @@ class UpdateData
                     'transaction_type'  => $deposit->deposit_type,
                     'related_type'      => 'Deposit',
                     'related_id'        => $deposit->id,
-                    'user_id'           => $deposit->user_id,
+                    'user_id'           => $oldUserId,
                     'amount'            => $oldAmount,
                     'direction'         => 'debit',
                     'transaction_date'  => now(),
@@ -59,31 +71,13 @@ class UpdateData
                     'debit_account_id'  => $capitalAccountId,
                     'credit_account_id' => $cashAccountId,
                 ]);
-            }
-
-            $deposit->update($requestData);
-
-            // Auto-find new due by member + for_month
-            if ($needsDueRefresh) {
-                $newDue = StoreData::findDue($deposit->fresh()->user_id, $deposit->fresh()->for_month);
-                if ($newDue) {
-                    $deposit->due_id = $newDue->id;
-                    $deposit->save();
-                    StoreData::updateDue($newDue->id, $newAmount, 'add');
-                } else {
-                    $deposit->due_id = null;
-                    $deposit->save();
-                }
-
-                $cashAccountId    = TransactionLogService::accountId('1000');
-                $capitalAccountId = TransactionLogService::accountId('2000');
 
                 TransactionLogService::record([
                     'voucher_no'        => $deposit->voucher_no . '-UPD',
-                    'transaction_type'  => $deposit->fresh()->deposit_type,
+                    'transaction_type'  => $deposit->deposit_type,
                     'related_type'      => 'Deposit',
                     'related_id'        => $deposit->id,
-                    'user_id'           => $deposit->fresh()->user_id,
+                    'user_id'           => $deposit->user_id,
                     'amount'            => $newAmount,
                     'direction'         => 'credit',
                     'transaction_date'  => now(),

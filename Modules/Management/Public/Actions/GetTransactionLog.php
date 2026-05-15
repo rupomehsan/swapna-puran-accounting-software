@@ -9,53 +9,34 @@ class GetTransactionLog
     public static function execute()
     {
         try {
-            $deposits = DB::table('deposits as d')
-                ->leftJoin('users as u', 'u.id', '=', 'd.user_id')
-                ->whereNull('d.deleted_at')
-                ->where('d.status', 'active')
+            $transactions = DB::table('transaction_logs as t')
+                ->leftJoin('users as u', 'u.id', '=', 't.user_id')
+                ->whereNull('t.deleted_at')
+                ->where('t.status', 'active')
                 ->select(
-                    'd.voucher_no',
-                    'u.name as member_name',
-                    DB::raw("'deposit' as type"),
-                    'd.deposit_type',
-                    DB::raw('CAST(d.amount AS DECIMAL(10,2)) as amount'),
-                    'd.for_month',
-                    'd.payment_date as date',
-                    'd.payment_method',
-                    'd.note'
+                    't.id',
+                    't.voucher_no',
+                    't.transaction_type',
+                    't.amount',
+                    't.direction',
+                    't.balance_after',
+                    't.transaction_date',
+                    't.description',
+                    'u.name as member_name'
                 )
+                ->orderByDesc('t.transaction_date')
                 ->get();
 
-            $withdrawals = DB::table('withdrawals as w')
-                ->leftJoin('users as u', 'u.id', '=', 'w.user_id')
-                ->whereNull('w.deleted_at')
-                ->where('w.status', 'active')
-                ->select(
-                    'w.voucher_no',
-                    'u.name as member_name',
-                    DB::raw("'withdrawal' as type"),
-                    DB::raw("NULL as deposit_type"),
-                    'w.amount',
-                    DB::raw("NULL as for_month"),
-                    'w.withdrawal_date as date',
-                    'w.payment_method',
-                    'w.note'
-                )
-                ->get();
-
-            $transactions = $deposits->concat($withdrawals)
-                ->sortByDesc('date')
-                ->values();
-
-            $summary = [
-                'total_deposits'    => (float) $deposits->sum('amount'),
-                'total_withdrawals' => (float) $withdrawals->sum('amount'),
-                'total_count'       => $transactions->count(),
-            ];
+            $totalCredit = (float) $transactions->where('direction', 'credit')->sum('amount');
+            $totalDebit  = (float) $transactions->where('direction', 'debit')->sum('amount');
 
             return entityResponse([
                 'transactions' => $transactions,
-                'summary'      => $summary,
+                'summary'      => [
+                    'total_credit' => $totalCredit,
+                    'total_debit'  => $totalDebit,
+                    'total_count'  => $transactions->count(),
+                ],
             ]);
         } catch (\Exception $e) {
             return messageResponse($e->getMessage(), [], 500, 'server_error');

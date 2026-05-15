@@ -5,7 +5,7 @@
 
       <!-- ── Standard text-like inputs ──────────────────────────────── -->
       <div
-        v-if="['text','number','password','email','date','time','datetime-local','url','tel','color'].includes(type)"
+        v-if="['text','number','password','email','date','month','time','datetime-local','url','tel','color'].includes(type)"
         class="mt-1 mb-3"
       >
         <input

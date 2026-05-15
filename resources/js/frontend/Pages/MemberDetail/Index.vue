@@ -70,7 +70,14 @@
               <div class="ps-item ps-item--indigo">
                 <span class="ps-item__icon"><i class="fas fa-layer-group"></i></span>
                 <span class="ps-item__label">No. of Shares</span>
-                <span class="ps-item__val">{{ member.number_of_share ?? 0 }}</span>
+                <span class="ps-item__val">
+                  {{ member.number_of_share ?? 0 }}
+                  <span v-if="stats.last_adjustment" class="share-trend-inline"
+                        :class="stats.last_adjustment.adjustment_type === 'increase' ? 'share-trend-inline--up' : 'share-trend-inline--down'">
+                    <i :class="stats.last_adjustment.adjustment_type === 'increase' ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                    {{ stats.last_adjustment.adjustment_type === 'increase' ? '+' : '−' }}{{ Math.abs(stats.last_adjustment.shares_delta || 0) }}
+                  </span>
+                </span>
               </div>
               <div class="ps-item ps-item--blue">
                 <span class="ps-item__icon"><i class="fas fa-piggy-bank"></i></span>
@@ -91,6 +98,11 @@
                 <span class="ps-item__icon"><i :class="stats.total_due > 0 ? 'fas fa-triangle-exclamation' : 'fas fa-circle-check'"></i></span>
                 <span class="ps-item__label">{{ stats.total_due > 0 ? 'Due Amount' : 'Due Status' }}</span>
                 <span class="ps-item__val">{{ stats.total_due > 0 ? '৳ ' + fmt(stats.total_due) : '✓ Clear' }}</span>
+              </div>
+              <div v-if="isAdvancePaid(stats.paid_till)" class="ps-item ps-item--purple">
+                <span class="ps-item__icon"><i class="fas fa-calendar-check"></i></span>
+                <span class="ps-item__label">Paid Till (Advance)</span>
+                <span class="ps-item__val">{{ fmtMonth(stats.paid_till) }}</span>
               </div>
             </div>
           </div>
@@ -139,10 +151,10 @@
                     </span>
                   </td>
                   <td class="td-amount">৳ {{ fmt(d.amount) }}</td>
-                  <td>{{ fmtMonth(d.for_month) }}</td>
-                  <td>{{ fmtDate(d.payment_date) }}</td>
+                  <td class="td-date">{{ fmtMonth(d.for_month) }}</td>
+                  <td class="td-date">{{ fmtDate(d.payment_date) }}</td>
                   <td class="td-method">{{ d.payment_method || '—' }}</td>
-                  <td class="td-note">{{ d.note || '—' }}</td>
+                  <td class="td-note">{{ stripHtml(d.note) || '—' }}</td>
                   <td class="td-img">
                     <button v-if="d.image" class="voucher-thumb-btn" @click="openLightbox(imgUrl(d.image))" title="View voucher">
                       <img :src="imgUrl(d.image)" :alt="'Voucher ' + d.voucher_no" class="voucher-thumb" />
@@ -206,7 +218,7 @@ export default {
       loading:     true,
       notFound:    false,
       member:      null,
-      stats:       { total_deposit: 0, total_share: 0, total_savings: 0, total_due: 0, deposit_count: 0 },
+      stats:       { total_deposit: 0, total_share: 0, total_savings: 0, total_due: 0, deposit_count: 0, paid_till: null, last_adjustment: null },
       deposits:    [],
       lightboxSrc: null,
     };
@@ -256,8 +268,20 @@ export default {
       if (!d) return '—';
       return new Date(d).toLocaleDateString('en-BD', { year: 'numeric', month: 'long' });
     },
+    isAdvancePaid(paidTill) {
+      if (!paidTill) return false;
+      const now = new Date();
+      const currentYM = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+      const paidYM = String(paidTill).slice(0, 7);
+      return paidYM > currentYM;
+    },
     initials(n) {
       return (n || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    },
+    stripHtml(html) {
+      if (!html) return '';
+      const text = String(html).replace(/<[^>]*>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
+      return text;
     },
   },
 };
@@ -405,7 +429,15 @@ export default {
   display: flex; flex-direction: column; gap: 4px;
 }
 .ps-item__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; color: #334155; }
-.ps-item__val   { font-size: 16px; font-weight: 800; }
+.ps-item__val   { font-size: 16px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+.share-trend-inline {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+}
+.share-trend-inline i { font-size: 9px; }
+.share-trend-inline--up   { background: #10b981; color: #fff; }
+.share-trend-inline--down { background: #f87171; color: #fff; }
 .ps-item__icon { font-size: 13px; color: #334155; margin-bottom: 2px; }
 .ps-item--indigo { border-color: rgba(99,102,241,0.25); background: rgba(99,102,241,0.06); }
 .ps-item--indigo .ps-item__val  { color: #a5b4fc; }
@@ -484,6 +516,7 @@ export default {
   border-bottom: 1px solid rgba(255,255,255,0.04);
   background: transparent !important;
   vertical-align: middle;
+  color: #cbd5e1 !important;
 }
 .dep-table tbody tr:hover td { background: rgba(99,102,241,0.04) !important; }
 .dep-table tfoot .dep-foot td {
@@ -492,11 +525,12 @@ export default {
   color: #a5b4fc; font-size: 13px;
 }
 
-.td-num    { color: #334155; font-weight: 700; width: 40px; }
-.td-mono   { font-family: monospace; font-size: 12px; color: #64748b; }
-.td-amount { color: #60a5fa; font-weight: 700; white-space: nowrap; }
-.td-method { color: #64748b; }
-.td-note   { color: #475569; font-size: 12px; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dep-table .td-num    { color: #64748b !important; font-weight: 700; width: 40px; }
+.dep-table .td-mono   { font-family: monospace; font-size: 12px; color: #94a3b8 !important; }
+.dep-table .td-amount { color: #60a5fa !important; font-weight: 700; white-space: nowrap; }
+.dep-table .td-date   { color: #cbd5e1 !important; white-space: nowrap; }
+.dep-table .td-method { color: #94a3b8 !important; }
+.dep-table .td-note   { color: #94a3b8 !important; font-size: 12px; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .type-badge {
   display: inline-block; padding: 3px 10px; border-radius: 20px;

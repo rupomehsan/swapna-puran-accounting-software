@@ -16,22 +16,6 @@ class GetPublicSummary
             $totalMembers     = DB::table('users')->where('role_id', 2)->whereNull('deleted_at')->where('status', 'active')->count();
             $netFund          = $totalDeposits - $totalWithdrawals;
 
-            // Load share configuration
-            $config     = DB::table('configurations')->whereNull('deleted_at')->where('status', 'active')->orderByDesc('updated_at')->first();
-            $sharePrice = $config ? (float) $config->share_price : 0;
-            $startDate  = $config ? new \DateTime($config->start_date) : null;
-
-            // Months elapsed since start_date (inclusive of start month)
-            $monthsPassed = 0;
-            if ($startDate) {
-                $startMonth   = \DateTime::createFromFormat('Y-m-d', $startDate->format('Y-m-01'));
-                $currentMonth = new \DateTime('first day of this month');
-                if ($currentMonth >= $startMonth) {
-                    $diff         = $startMonth->diff($currentMonth);
-                    $monthsPassed = $diff->y * 12 + $diff->m + 1; // inclusive
-                }
-            }
-
             $members = DB::table('users as u')
                 ->where('u.role_id', 2)
                 ->whereNull('u.deleted_at')
@@ -62,6 +46,14 @@ class GetPublicSummary
                         ->groupBy('user_id'),
                     'sav', 'sav.user_id', '=', 'u.id'
                 )
+                ->leftJoinSub(
+                    DB::table('dues')
+                        ->whereNull('deleted_at')
+                        ->whereIn('payment_status', ['unpaid', 'partial'])
+                        ->select('user_id', DB::raw('SUM(remaining_amount) as total_due'))
+                        ->groupBy('user_id'),
+                    'due', 'due.user_id', '=', 'u.id'
+                )
                 ->select(
                     'u.id',
                     'u.name',
@@ -70,16 +62,35 @@ class GetPublicSummary
                     DB::raw('COALESCE(dep.total_deposit, 0) as total_deposit'),
                     DB::raw('COALESCE(dep.deposit_count, 0) as deposit_count'),
                     DB::raw('COALESCE(sha.total_share, 0) as total_share'),
-                    DB::raw('COALESCE(sav.total_savings, 0) as total_savings')
+                    DB::raw('COALESCE(sav.total_savings, 0) as total_savings'),
+                    DB::raw('COALESCE(due.total_due, 0) as total_due')
                 )
                 ->orderByDesc('u.number_of_share')
-                ->get()
-                ->map(function ($member) use ($monthsPassed, $sharePrice) {
-                    $expected         = $monthsPassed * $member->number_of_share * $sharePrice;
-                    $paid             = (float) $member->total_share;
-                    $member->total_due = max(0, $expected - $paid);
-                    return $member;
-                });
+                ->get();
+
+            // Compute paid_till per member: latest *contiguous* paid month from oldest to newest
+            $paidTillMap = self::computePaidTillMap();
+
+            // Latest share adjustment per member (for up/down arrow indicator)
+            $latestAdjustments = [];
+            if (\Illuminate\Support\Facades\Schema::hasTable('share_adjustments')) {
+                $rows = DB::table('share_adjustments')
+                    ->whereNull('deleted_at')
+                    ->where('status', 'active')
+                    ->orderBy('user_id')
+                    ->orderByDesc('id')
+                    ->get(['user_id', 'adjustment_type', 'from_shares', 'to_shares', 'shares_delta', 'created_at']);
+                foreach ($rows as $row) {
+                    if (!isset($latestAdjustments[$row->user_id])) {
+                        $latestAdjustments[$row->user_id] = $row;
+                    }
+                }
+            }
+
+            foreach ($members as $m) {
+                $m->paid_till       = $paidTillMap[$m->id] ?? null;
+                $m->last_adjustment = $latestAdjustments[$m->id] ?? null;
+            }
 
             $data = [
                 'org' => [
@@ -97,5 +108,36 @@ class GetPublicSummary
         } catch (\Exception $e) {
             return messageResponse($e->getMessage(), [], 500, 'server_error');
         }
+    }
+
+    /**
+     * For each member, walk their dues in chronological order and return the
+     * latest month they are *fully paid through*. Stops at the first
+     * unpaid/partial month (so a later "paid" month does not give false credit).
+     *
+     * @return array<int, string>  user_id => 'YYYY-MM-DD'
+     */
+    protected static function computePaidTillMap(): array
+    {
+        $allDues = DB::table('dues')
+            ->whereNull('deleted_at')
+            ->orderBy('user_id')
+            ->orderBy('for_month', 'asc')
+            ->get(['user_id', 'for_month', 'payment_status']);
+
+        $paidTill = [];
+        $stopped  = [];
+
+        foreach ($allDues as $d) {
+            if (isset($stopped[$d->user_id])) continue;
+
+            if ($d->payment_status === 'paid') {
+                $paidTill[$d->user_id] = $d->for_month;
+            } else {
+                $stopped[$d->user_id] = true;
+            }
+        }
+
+        return $paidTill;
     }
 }

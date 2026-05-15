@@ -47,6 +47,7 @@ include_once base_path("Modules/Management/TodoListManagement/TodoList/Routes/Ro
 include_once base_path("Modules/Management/Configuration/Routes/Route.php");
 include_once base_path("Modules/Management/Deposit/Routes/Route.php");
 include_once base_path("Modules/Management/Due/Routes/Route.php");
+include_once base_path("Modules/Management/ShareAdjustment/Routes/Route.php");
 include_once base_path("Modules/Management/Withdrawal/Routes/Route.php");
 include_once base_path("Modules/Management/IncomeEntry/Routes/Route.php");
 include_once base_path("Modules/Management/ExpenseEntry/Routes/Route.php");

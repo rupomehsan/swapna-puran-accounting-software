@@ -227,7 +227,7 @@ export default {
     applyDummy(){ this.summary=DS; this.monthlyDeposits=DM; this.apiError=true; },
     async fetchData(){
       try{
-        const res=await axios.get('/api/public/balance-sheet');
+        const res=await axios.get(`${location.origin}/api/public/balance-sheet`);
         const d=res.data?.data;
         if(d&&d.summary){this.summary=d.summary;this.monthlyDeposits=d.monthly_deposits||[];}
         else this.applyDummy();

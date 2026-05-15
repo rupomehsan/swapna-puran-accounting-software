@@ -13,6 +13,7 @@ import JournalRoutes from '../Management/Journal/setup/routes.js';
 import AccountRoutes from '../Management/Account/setup/routes.js';
 import WithdrawalRoutes from '../Management/Withdrawal/setup/routes.js';
 import DueRoutes            from '../Management/Due/setup/routes.js';
+import ShareAdjustmentRoutes from '../Management/ShareAdjustment/setup/routes.js';
 import ExpenseEntryRoutes   from '../Management/ExpenseEntry/setup/routes.js';
 import IncomeEntryRoutes    from '../Management/IncomeEntry/setup/routes.js';
 import TransactionLogRoutes from '../Management/TransactionLog/setup/routes.js';
@@ -39,6 +40,7 @@ const routes = {
         AccountRoutes,
         WithdrawalRoutes,
         DueRoutes,
+        ShareAdjustmentRoutes,
         ExpenseEntryRoutes,
         IncomeEntryRoutes,
         TransactionLogRoutes,

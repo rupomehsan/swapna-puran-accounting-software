@@ -21,6 +21,16 @@ class DataUpdateValidation extends FormRequest
         );
     }
 
+    /**
+     * Normalize YYYY-MM (from <input type="month">) to YYYY-MM-01 before validation.
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->for_month && preg_match('/^\d{4}-\d{2}$/', $this->for_month)) {
+            $this->merge(['for_month' => $this->for_month . '-01']);
+        }
+    }
+
     public function rules(): array
     {
         return [

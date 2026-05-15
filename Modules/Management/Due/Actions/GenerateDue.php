@@ -4,7 +4,6 @@ namespace Modules\Management\Due\Actions;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Modules\Helpers\Services\TransactionLogService;
 
 class GenerateDue
 {
@@ -94,22 +93,13 @@ class GenerateDue
                         'payment_status'   => 'unpaid',
                     ]);
 
-                    TransactionLogService::record([
-                        'voucher_no'        => TransactionLogService::generateVoucher('DUE'),
-                        'transaction_type'  => 'due_created',
-                        'related_type'      => 'Due',
-                        'related_id'        => $due->id,
-                        'user_id'           => $member->id,
-                        'amount'            => $dueAmount,
-                        'direction'         => 'debit',
-                        'transaction_date'  => now(),
-                        'description'       => "Monthly due — " . $month->format('F Y'),
-                        'debit_account_id'  => null,
-                        'credit_account_id' => null,
-                    ]);
-
                     $created++;
                 }
+
+                // After all months processed for this member, redistribute their
+                // share_deposits across the (possibly new) dues. Handles lump-sum
+                // payments and new-member back-due scenarios.
+                StoreData::reconcileMember($member->id);
             }
 
             DB::commit();

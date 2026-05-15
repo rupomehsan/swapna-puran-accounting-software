@@ -22,7 +22,8 @@ export default [
 			{ label: "Share Deposit (মাসিক শেয়ার)", value: "share_deposit" },
 			{ label: "Extra Savings (অতিরিক্ত সঞ্চয়)", value: "extra_savings" },
 		],
-		value: "",
+		value: "share_deposit",
+		default: "share_deposit",
 		is_visible: true,
 		class: "col-md-6",
 	},
@@ -37,7 +38,7 @@ export default [
 	{
 		name: "for_month",
 		label: "For Month (কোন মাসের জন্য)",
-		type: "date",
+		type: "month",
 		value: "",
 		is_visible: true,
 		class: "col-md-6",

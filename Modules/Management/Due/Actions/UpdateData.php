@@ -6,17 +6,22 @@ class UpdateData
 {
     static $model = \Modules\Management\Due\Database\Models\Model::class;
 
-    public static function execute($request,$slug)
+    public static function execute($request, $slug)
     {
         try {
-            if (!$data = self::$model::query()->where('slug', $slug)->first()) {
-                return messageResponse('Data not found...',$data, 404, 'error');
+            if (!$due = self::$model::query()->where('slug', $slug)->first()) {
+                return messageResponse('Data not found...', $due, 404, 'error');
             }
-            $requestData = $request->validated();
-            $data->update($requestData);
-            return messageResponse('Item updated successfully',$data, 201);
+
+            $due->update($request->validated());
+            $due->refresh();
+
+            // Re-reconcile after update (due_amount or for_month may have changed)
+            StoreData::reconcile($due);
+
+            return messageResponse('Item updated successfully', $due, 201);
         } catch (\Exception $e) {
-            return messageResponse($e->getMessage(),[], 500, 'server_error');
+            return messageResponse($e->getMessage(), [], 500, 'server_error');
         }
     }
 }

@@ -229,7 +229,7 @@ export default {
   color: var(--text-primary);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.ss-control:hover         { border-color: var(--border-dark); }
+.ss-control:hover         { border-color: var(--border-light); }
 .ss-control--open         { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(59,130,246,.15); }
 
 /* ── Search input ──────────────────────────────────────────────────── */

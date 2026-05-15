@@ -84,7 +84,7 @@ export default {
     }),
 
     reset_fields() {
-      this.form_fields.forEach((f) => (f.value = ""));
+      this.form_fields.forEach((f) => (f.value = f.default ?? ""));
     },
 
     async load_members() {
@@ -119,7 +119,12 @@ export default {
         this.form_fields.forEach((field, index) => {
           Object.entries(this.item).forEach(([key, val]) => {
             if (field.name === key) {
-              this.form_fields[index].value = val;
+              // <input type="month"> needs YYYY-MM, but DB stores YYYY-MM-DD
+              if (field.type === 'month' && val && typeof val === 'string' && val.length >= 7) {
+                this.form_fields[index].value = val.substring(0, 7);
+              } else {
+                this.form_fields[index].value = val;
+              }
             }
           });
         });

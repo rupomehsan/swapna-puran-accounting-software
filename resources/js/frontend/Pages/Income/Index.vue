@@ -95,7 +95,7 @@
                 <td class="td-src">
                   <span class="src-dot"></span>{{ e.income_source||'—' }}
                 </td>
-                <td class="td-desc">{{ e.description||'—' }}</td>
+                <td class="td-desc">{{ stripHtml(e.description)||'—' }}</td>
                 <td class="td-amt amt-g">+৳{{ fmt(e.amount) }}</td>
               </tr>
             </tbody>
@@ -136,10 +136,11 @@ export default {
   methods:{
     fmt(n){ return Number(n||0).toLocaleString('en-BD',{minimumFractionDigits:2}); },
     fDate(d){ if(!d)return'—'; return new Date(d).toLocaleDateString('en-BD',{year:'numeric',month:'short',day:'2-digit'}); },
+    stripHtml(h){ if(!h)return''; return h.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim(); },
     applyDummy(){ this.entries=DUMMY; this.total=DUMMY.reduce((s,e)=>s+e.amount,0); this.apiError=true; },
     async fetchData(){
       try{
-        const res=await axios.get('/api/public/income');
+        const res=await axios.get(`${location.origin}/api/public/income`);
         const d=res.data?.data;
         if(d&&d.entries&&d.entries.length>0){this.entries=d.entries;this.total=d.total;}
         else this.applyDummy();

@@ -179,13 +179,23 @@
                 <div class="mrow__txn">{{ m.deposit_count }} deposit{{ m.deposit_count !== 1 ? "s" : "" }}</div>
               </div>
 
-              <div class="mrow__share-badge">
+              <div class="mrow__share-badge"
+                   :class="m.last_adjustment ? (m.last_adjustment.adjustment_type === 'increase' ? 'mrow__share-badge--up' : 'mrow__share-badge--down') : ''">
                 <span class="share-num">{{ m.number_of_share ?? 0 }}</span>
                 <span class="share-lbl"><i class="fas fa-layer-group"></i> শেয়ার</span>
+                <span v-if="m.last_adjustment" class="share-trend"
+                      :title="adjustmentTitle(m.last_adjustment)">
+                  <i :class="m.last_adjustment.adjustment_type === 'increase' ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                  {{ m.last_adjustment.adjustment_type === 'increase' ? '+' : '−' }}{{ Math.abs(m.last_adjustment.shares_delta || 0) }}
+                </span>
               </div>
 
               <div class="mrow__pills">
                 <span class="pill pill--blue">Total ৳{{ fmt(m.total_deposit) }}</span>
+                <span v-if="isAdvancePaid(m.paid_till)" class="pill pill--paidtill" :title="'Paid in advance through ' + fmtMonth(m.paid_till)">
+                  <i class="fas fa-calendar-check"></i>
+                  Paid till {{ fmtMonth(m.paid_till) }}
+                </span>
                 <span class="pill" :class="m.total_due > 0 ? 'pill--red' : 'pill--complete'">
                   <i :class="m.total_due > 0 ? 'fas fa-circle-exclamation' : 'fas fa-circle-check'"></i>
                   {{ m.total_due > 0 ? "Due ৳" + fmt(m.total_due) : "সম্পূর্ণ পরিশোধ" }}
@@ -500,6 +510,20 @@ export default {
     fmtMonth(d) {
       if (!d) return "—";
       return new Date(d).toLocaleDateString("en-BD", { year: "numeric", month: "long" });
+    },
+    isAdvancePaid(paidTill) {
+      // Show "Paid till X" only when X is BEYOND the current month
+      // (current month payment is just basic, not advance)
+      if (!paidTill) return false;
+      const now = new Date();
+      const currentYM = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+      const paidYM = String(paidTill).slice(0, 7);
+      return paidYM > currentYM;
+    },
+    adjustmentTitle(adj) {
+      if (!adj) return "";
+      const arrow = adj.adjustment_type === "increase" ? "↑" : "↓";
+      return `${arrow} ${adj.from_shares} → ${adj.to_shares} on ${this.fmtDate(adj.created_at)}`;
     },
     initials(n) {
       return (n || "?")
@@ -1128,7 +1152,41 @@ export default {
   border-radius: 14px;
   padding: 8px 14px;
   gap: 2px;
+  position: relative;
 }
+.mrow__share-badge--up {
+  background: rgba(16,185,129,0.1);
+  border-color: rgba(16,185,129,0.4);
+}
+.mrow__share-badge--down {
+  background: rgba(248,113,113,0.1);
+  border-color: rgba(248,113,113,0.4);
+}
+.share-trend {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 7px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  border: 1.5px solid #0f172a;
+  white-space: nowrap;
+  cursor: help;
+}
+.mrow__share-badge--up   .share-trend {
+  background: #10b981;
+  color: #fff;
+}
+.mrow__share-badge--down .share-trend {
+  background: #f87171;
+  color: #fff;
+}
+.share-trend i { font-size: 9px; }
 .share-num {
   font-size: 26px;
   font-weight: 900;
@@ -1253,6 +1311,15 @@ export default {
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.22);
+}
+.pill--paidtill {
+  background: rgba(168, 85, 247, 0.1);
+  color: #c4b5fd;
+  border: 1px solid rgba(168, 85, 247, 0.22);
+}
+.pill--paidtill i {
+  margin-right: 4px;
+  font-size: 10px;
 }
 
 /* ─── Spinner ────────────────────────────────────────────────── */

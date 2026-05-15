@@ -4,6 +4,7 @@ namespace Modules\Management\Deposit\Actions;
 
 use Illuminate\Support\Facades\DB;
 use Modules\Helpers\Services\TransactionLogService;
+use Modules\Management\Due\Actions\StoreData as DueStoreData;
 
 class StoreData
 {
@@ -26,12 +27,23 @@ class StoreData
 
             $deposit = self::$model::create($requestData);
 
-            // Auto-find the due for this member + month and mark it paid
-            $due = self::findDue($deposit->user_id, $deposit->for_month);
-            if ($due) {
-                $deposit->due_id = $due->id;
-                $deposit->save();
-                self::updateDue($due->id, $deposit->amount, 'add');
+            // For share deposits: auto-distribute across all unpaid dues (oldest first)
+            // This supports lump-sum payments covering multiple months.
+            if ($deposit->deposit_type === 'share_deposit') {
+                DueStoreData::reconcileMember($deposit->user_id);
+
+                // Link this deposit to the due matching its for_month (for reporting)
+                if ($deposit->for_month) {
+                    $monthDue = self::$dueModel::where('user_id', $deposit->user_id)
+                        ->whereYear('for_month',  date('Y', strtotime($deposit->for_month)))
+                        ->whereMonth('for_month', date('m', strtotime($deposit->for_month)))
+                        ->whereNull('deleted_at')
+                        ->first();
+                    if ($monthDue) {
+                        $deposit->due_id = $monthDue->id;
+                        $deposit->save();
+                    }
+                }
             }
 
             $cashAccountId    = TransactionLogService::accountId('1000');
@@ -58,43 +70,5 @@ class StoreData
             DB::rollBack();
             return messageResponse($e->getMessage(), [], 500, 'server_error');
         }
-    }
-
-    /**
-     * Find unpaid/partial due for this member in the same year-month as for_month.
-     */
-    public static function findDue(int $userId, $forMonth): ?object
-    {
-        if (!$forMonth) return null;
-
-        return self::$dueModel::where('user_id', $userId)
-            ->whereYear('for_month', date('Y', strtotime($forMonth)))
-            ->whereMonth('for_month', date('m', strtotime($forMonth)))
-            ->whereIn('payment_status', ['unpaid', 'partial'])
-            ->first();
-    }
-
-    /**
-     * Adjust due paid_amount and payment_status.
-     * $mode = 'add' (new payment) | 'reverse' (undo old amount)
-     */
-    public static function updateDue(int $dueId, float $amount, string $mode): void
-    {
-        $due = self::$dueModel::find($dueId);
-        if (!$due) return;
-
-        if ($mode === 'add') {
-            $due->paid_amount = $due->paid_amount + $amount;
-        } else {
-            $due->paid_amount = max(0, $due->paid_amount - $amount);
-        }
-
-        $due->remaining_amount = max(0, $due->due_amount - $due->paid_amount);
-        $due->payment_status   = match (true) {
-            $due->remaining_amount <= 0 => 'paid',
-            $due->paid_amount > 0       => 'partial',
-            default                     => 'unpaid',
-        };
-        $due->save();
     }
 }
