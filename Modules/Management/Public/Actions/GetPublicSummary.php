@@ -16,6 +16,22 @@ class GetPublicSummary
             $totalMembers     = DB::table('users')->where('role_id', 2)->whereNull('deleted_at')->where('status', 'active')->count();
             $netFund          = $totalDeposits - $totalWithdrawals;
 
+            // Load share configuration
+            $config     = DB::table('configurations')->whereNull('deleted_at')->where('status', 'active')->orderByDesc('updated_at')->first();
+            $sharePrice = $config ? (float) $config->share_price : 0;
+            $startDate  = $config ? new \DateTime($config->start_date) : null;
+
+            // Months elapsed since start_date (inclusive of start month)
+            $monthsPassed = 0;
+            if ($startDate) {
+                $startMonth   = \DateTime::createFromFormat('Y-m-d', $startDate->format('Y-m-01'));
+                $currentMonth = new \DateTime('first day of this month');
+                if ($currentMonth >= $startMonth) {
+                    $diff         = $startMonth->diff($currentMonth);
+                    $monthsPassed = $diff->y * 12 + $diff->m + 1; // inclusive
+                }
+            }
+
             $members = DB::table('users as u')
                 ->where('u.role_id', 2)
                 ->whereNull('u.deleted_at')
@@ -46,26 +62,24 @@ class GetPublicSummary
                         ->groupBy('user_id'),
                     'sav', 'sav.user_id', '=', 'u.id'
                 )
-                ->leftJoinSub(
-                    DB::table('dues')
-                        ->whereNull('deleted_at')
-                        ->whereIn('payment_status', ['unpaid', 'partial'])
-                        ->select('user_id', DB::raw('SUM(remaining_amount) as total_due'))
-                        ->groupBy('user_id'),
-                    'due', 'due.user_id', '=', 'u.id'
-                )
                 ->select(
                     'u.id',
                     'u.name',
                     'u.image',
+                    'u.number_of_share',
                     DB::raw('COALESCE(dep.total_deposit, 0) as total_deposit'),
                     DB::raw('COALESCE(dep.deposit_count, 0) as deposit_count'),
                     DB::raw('COALESCE(sha.total_share, 0) as total_share'),
-                    DB::raw('COALESCE(sav.total_savings, 0) as total_savings'),
-                    DB::raw('COALESCE(due.total_due, 0) as total_due')
+                    DB::raw('COALESCE(sav.total_savings, 0) as total_savings')
                 )
-                ->orderByDesc('total_deposit')
-                ->get();
+                ->orderByDesc('u.number_of_share')
+                ->get()
+                ->map(function ($member) use ($monthsPassed, $sharePrice) {
+                    $expected         = $monthsPassed * $member->number_of_share * $sharePrice;
+                    $paid             = (float) $member->total_share;
+                    $member->total_due = max(0, $expected - $paid);
+                    return $member;
+                });
 
             $data = [
                 'org' => [

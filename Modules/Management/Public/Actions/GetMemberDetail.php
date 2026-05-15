@@ -31,11 +31,23 @@ class GetMemberDetail
             $totalShare   = $deposits->filter(fn($d) => $d->deposit_type === 'share_deposit')->sum(fn($d) => (float) $d->amount);
             $totalSavings = $deposits->filter(fn($d) => $d->deposit_type === 'extra_savings')->sum(fn($d) => (float) $d->amount);
 
-            $totalDue = (float) DB::table('dues')
-                ->where('user_id', $userId)
-                ->whereNull('deleted_at')
-                ->whereIn('payment_status', ['unpaid', 'partial'])
-                ->sum('remaining_amount');
+            // Config-based due calculation
+            $config     = DB::table('configurations')->whereNull('deleted_at')->where('status', 'active')->orderByDesc('updated_at')->first();
+            $sharePrice = $config ? (float) $config->share_price : 0;
+            $startDate  = $config ? new \DateTime($config->start_date) : null;
+
+            $monthsPassed = 0;
+            if ($startDate) {
+                $startMonth   = \DateTime::createFromFormat('Y-m-d', $startDate->format('Y-m-01'));
+                $currentMonth = new \DateTime('first day of this month');
+                if ($currentMonth >= $startMonth) {
+                    $diff         = $startMonth->diff($currentMonth);
+                    $monthsPassed = $diff->y * 12 + $diff->m + 1; // inclusive
+                }
+            }
+
+            $expected = $monthsPassed * $member->number_of_share * $sharePrice;
+            $totalDue = max(0, $expected - $totalShare);
 
             return entityResponse([
                 'member'  => $member,

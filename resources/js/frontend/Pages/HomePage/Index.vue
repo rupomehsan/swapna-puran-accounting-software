@@ -179,17 +179,20 @@
                 <div class="mrow__txn">{{ m.deposit_count }} deposit{{ m.deposit_count !== 1 ? "s" : "" }}</div>
               </div>
 
+              <div class="mrow__share-badge">
+                <span class="share-num">{{ m.number_of_share ?? 0 }}</span>
+                <span class="share-lbl"><i class="fas fa-layer-group"></i> শেয়ার</span>
+              </div>
+
               <div class="mrow__pills">
                 <span class="pill pill--blue">Total ৳{{ fmt(m.total_deposit) }}</span>
-                <span class="pill pill--purple">Share ৳{{ fmt(m.total_share) }}</span>
-                <span class="pill pill--green">Extra ৳{{ fmt(m.total_savings) }}</span>
-                <span class="pill" :class="m.total_due > 0 ? 'pill--red' : 'pill--clear'">
-                  {{ m.total_due > 0 ? "Due ৳" + fmt(m.total_due) : "✓ Clear" }}
+                <span class="pill" :class="m.total_due > 0 ? 'pill--red' : 'pill--complete'">
+                  <i :class="m.total_due > 0 ? 'fas fa-circle-exclamation' : 'fas fa-circle-check'"></i>
+                  {{ m.total_due > 0 ? "Due ৳" + fmt(m.total_due) : "সম্পূর্ণ পরিশোধ" }}
                 </span>
               </div>
 
               <div class="mrow__right">
-                <span class="mrow__rank" :class="'rank-' + Math.min(idx + 1, 4)">#{{ idx + 1 }}</span>
                 <Link :href="'/member/' + m.id" class="mrow__btn">
                   <i class="fas fa-eye"></i> Details
                 </Link>
@@ -234,6 +237,21 @@
             <h3 class="info-card__title">স্বচ্ছতা</h3>
             <p class="info-card__text">প্রতিটি লেনদেন ডিজিটালভাবে সংরক্ষিত এবং সকল সদস্যের কাছে সম্পূর্ণ স্বচ্ছ ও অ্যাক্সেসযোগ্য।</p>
           </div>
+          <div class="info-card">
+            <div class="info-card__icon">🏠</div>
+            <h3 class="info-card__title">নিজস্ব বাসস্থান</h3>
+            <p class="info-card__text">আমাদের মূল স্বপ্ন — একটি নিজস্ব বাসস্থান গড়ে তোলা, যেখানে আমরা সকল সদস্য ভবিষ্যতে একসাথে বসবাস করতে পারব।</p>
+          </div>
+          <div class="info-card">
+            <div class="info-card__icon">🤲</div>
+            <h3 class="info-card__title">অলাভজনক উদ্যোগ</h3>
+            <p class="info-card__text">আমরা কোনো মুনাফামুখী প্রতিষ্ঠান নই। আমাদের প্রতিটি সঞ্চয় শুধুমাত্র সদস্যদের সম্মিলিত ভবিষ্যৎ পরিকল্পনা বাস্তবায়নের জন্য।</p>
+          </div>
+          <div class="info-card">
+            <div class="info-card__icon">🏗️</div>
+            <h3 class="info-card__title">রিয়েল এস্টেট পরিকল্পনা</h3>
+            <p class="info-card__text">পর্যাপ্ত তহবিল সংগ্রহের পর আমরা রিয়েল এস্টেট ব্যবসায় বিনিয়োগ করব এবং সদস্যদের জন্য একটি স্থায়ী আবাসন নিশ্চিত করব।</p>
+          </div>
         </div>
       </div>
     </section>
@@ -277,6 +295,34 @@
               <p class="obj-item__text">প্রযুক্তির সাহায্যে সকল আর্থিক কার্যক্রম ডিজিটালভাবে পরিচালনা করা এবং সকলের কাছে হিসাব-নিকাশ স্বচ্ছ রাখা।</p>
             </div>
           </div>
+          <div class="obj-item">
+            <div class="obj-item__num">০৫</div>
+            <div class="obj-item__body">
+              <h4 class="obj-item__title">বহুমুখী ব্যবসায়িক উদ্যোগ</h4>
+              <p class="obj-item__text">পর্যাপ্ত তহবিল গড়ে ওঠার পর সদস্যদের সম্মিলিত সিদ্ধান্তে বিভিন্ন সেক্টরে ব্যবসায়িক উদ্যোগ গ্রহণ করা হবে, যা সংগঠনের আর্থিক ভিত্তিকে আরও মজবুত করবে।</p>
+            </div>
+          </div>
+          <div class="obj-item">
+            <div class="obj-item__num">০৬</div>
+            <div class="obj-item__body">
+              <h4 class="obj-item__title">কৌশলগত বিনিয়োগ</h4>
+              <p class="obj-item__text">রিয়েল এস্টেটসহ বিভিন্ন লাভজনক খাতে সুচিন্তিতভাবে বিনিয়োগ করা হবে, যাতে সদস্যদের জমানো অর্থ দীর্ঘমেয়াদে সর্বোচ্চ মুনাফা অর্জন করতে পারে।</p>
+            </div>
+          </div>
+          <div class="obj-item">
+            <div class="obj-item__num">০৭</div>
+            <div class="obj-item__body">
+              <h4 class="obj-item__title">সামাজিক উন্নয়ন কার্যক্রম</h4>
+              <p class="obj-item__text">শুধু নিজেদের উন্নয়নেই নয়, সমাজের সুবিধাবঞ্চিত মানুষদের পাশে দাঁড়ানো আমাদের দায়িত্ব। এলাকার শিক্ষা, স্বাস্থ্য ও অবকাঠামো উন্নয়নে আমরা সক্রিয় ভূমিকা রাখব।</p>
+            </div>
+          </div>
+          <div class="obj-item">
+            <div class="obj-item__num">০৮</div>
+            <div class="obj-item__body">
+              <h4 class="obj-item__title">ধর্মীয় ও মানবিক দান-সদকা</h4>
+              <p class="obj-item__text">আখেরাতের পাথেয় হিসেবে মাদ্রাসা, মসজিদ ও এতিমখানার উন্নয়নে নিয়মিত দান করা হবে। দুনিয়ার পাশাপাশি পরকালীন কল্যাণের কথা মাথায় রেখে আমরা একটি ন্যায়ভিত্তিক সমাজ গড়তে চাই।</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -293,35 +339,67 @@
         </div>
         <div class="terms-grid">
           <div class="terms-card">
-            <h4 class="terms-card__title"><span class="terms-card__icon">📌</span> সদস্যপদ</h4>
+            <h4 class="terms-card__title"><span class="terms-card__icon">💰</span> শুধুমাত্র জমার নীতি</h4>
             <ul class="terms-card__list">
-              <li>সদস্যপদ গ্রহণের জন্য কমিটির অনুমোদন আবশ্যক।</li>
-              <li>প্রতিটি সদস্যকে নির্ধারিত নিয়মকানুন মেনে চলতে হবে।</li>
-              <li>সদস্যপদ হস্তান্তরযোগ্য নয়।</li>
+              <li>সদস্যরা কেবলমাত্র অর্থ জমা দিতে পারবেন — সাধারণ অবস্থায় উত্তোলন সম্পূর্ণ নিষিদ্ধ।</li>
+              <li>এটি একটি দীর্ঘমেয়াদী পরিকল্পনা — তাৎক্ষণিক প্রয়োজনে এখানে হাত দেওয়া যাবে না।</li>
+              <li>জমানো অর্থ সংগঠনের চূড়ান্ত লক্ষ্য পূরণের আগ পর্যন্ত সম্পূর্ণ সুরক্ষিত থাকবে।</li>
             </ul>
           </div>
           <div class="terms-card">
-            <h4 class="terms-card__title"><span class="terms-card__icon">💳</span> জমা ও উত্তোলন</h4>
+            <h4 class="terms-card__title"><span class="terms-card__icon">🤝</span> উত্তোলনের বিশেষ বিধান</h4>
             <ul class="terms-card__list">
-              <li>প্রতি মাসে নির্ধারিত তারিখের মধ্যে জমা দিতে হবে।</li>
-              <li>উত্তোলনের জন্য কমিটির পূর্বানুমতি প্রয়োজন।</li>
-              <li>বিলম্বে জমার ক্ষেত্রে জরিমানা প্রযোজ্য হতে পারে।</li>
+              <li>কোনো সদস্য উত্তোলন করতে চাইলে সকল সদস্যের সর্বসম্মতিক্রমে তা বিবেচনা করা যেতে পারে।</li>
+              <li>সর্বসম্মতি ছাড়া কোনো অবস্থায়ই উত্তোলনের সুযোগ দেওয়া হবে না।</li>
+              <li>একজনের উত্তোলন সংগঠনের সামগ্রিক লক্ষ্যকে ক্ষতিগ্রস্ত করতে পারে — এ বিষয়ে সকলকে সচেতন থাকতে হবে।</li>
             </ul>
           </div>
           <div class="terms-card">
-            <h4 class="terms-card__title"><span class="terms-card__icon">⚖️</span> দায়িত্ব ও অধিকার</h4>
+            <h4 class="terms-card__title"><span class="terms-card__icon">⚖️</span> লাভ-ক্ষতির সম্মিলিত দায়বদ্ধতা</h4>
             <ul class="terms-card__list">
-              <li>প্রতিটি সদস্যের তাদের জমানো অর্থের উপর পূর্ণ অধিকার রয়েছে।</li>
-              <li>সভায় অংশগ্রহণ করা প্রতিটি সদস্যের দায়িত্ব।</li>
-              <li>সিদ্ধান্ত গ্রহণে সকল সদস্যের সমান ভোটাধিকার রয়েছে।</li>
+              <li>যেকোনো বিনিয়োগে লাভ বা ক্ষতি হতে পারে — এটি স্বাভাবিক ব্যবসায়িক ঝুঁকি।</li>
+              <li>লাভ-ক্ষতির জন্য কেউ কাউকে কোনোভাবেই দোষারোপ করতে পারবেন না।</li>
+              <li>সকল সদস্য স্বেচ্ছায় ও সজ্ঞানে এই ঝুঁকি গ্রহণ করেছেন বলে বিবেচিত হবে।</li>
             </ul>
           </div>
           <div class="terms-card">
-            <h4 class="terms-card__title"><span class="terms-card__icon">🔒</span> গোপনীয়তা</h4>
+            <h4 class="terms-card__title"><span class="terms-card__icon">🗳️</span> সংখ্যাগরিষ্ঠতার ভিত্তিতে সিদ্ধান্ত</h4>
             <ul class="terms-card__list">
-              <li>সদস্যদের ব্যক্তিগত তথ্য সম্পূর্ণ গোপনীয় রাখা হবে।</li>
-              <li>আর্থিক তথ্য শুধুমাত্র সংশ্লিষ্ট সদস্যকে প্রদান করা হবে।</li>
-              <li>তৃতীয় পক্ষের সাথে তথ্য শেয়ার করা হবে না।</li>
+              <li>সংগঠনের যেকোনো নতুন সিদ্ধান্ত সংখ্যাগরিষ্ঠ সদস্যদের ভোটের মাধ্যমে নির্ধারিত হবে।</li>
+              <li>কোনো একজনের ইচ্ছা বা স্বার্থে গোটা সংগঠন পরিচালিত হবে না।</li>
+              <li>ভোটের রায় সকলের জন্য বাধ্যকর এবং তা মেনে নেওয়া প্রতিটি সদস্যের দায়িত্ব।</li>
+            </ul>
+          </div>
+          <div class="terms-card">
+            <h4 class="terms-card__title"><span class="terms-card__icon">📅</span> মাসিক সঞ্চয়ের দায়িত্ব</h4>
+            <ul class="terms-card__list">
+              <li>প্রতিটি সদস্যের প্রতি মাসে নির্ধারিত পরিমাণ জমা দেওয়ার চেষ্টা করতে হবে।</li>
+              <li>এক মাস দিতে না পারলে পরের মাসে দুই মাসের টাকা একসাথে দেওয়া সম্পূর্ণ গ্রহণযোগ্য।</li>
+              <li>ধারাবাহিকভাবে দীর্ঘসময় জমা না দিলে কমিটি বিষয়টি আলোচনার মাধ্যমে সমাধান করবে।</li>
+            </ul>
+          </div>
+          <div class="terms-card">
+            <h4 class="terms-card__title"><span class="terms-card__icon">📊</span> স্বচ্ছ হিসাব ও জবাবদিহিতা</h4>
+            <ul class="terms-card__list">
+              <li>সংগঠনের সকল আয়-ব্যয়ের হিসাব প্রতিটি সদস্যের কাছে সম্পূর্ণ উন্মুক্ত থাকবে।</li>
+              <li>নিয়মিত সভায় আর্থিক প্রতিবেদন উপস্থাপন করা হবে।</li>
+              <li>যেকোনো সদস্য যেকোনো সময় হিসাব যাচাই করে দেখার অধিকার রাখেন।</li>
+            </ul>
+          </div>
+          <div class="terms-card">
+            <h4 class="terms-card__title"><span class="terms-card__icon">🤲</span> পারস্পরিক শ্রদ্ধা ও ঐক্য</h4>
+            <ul class="terms-card__list">
+              <li>সংগঠনের সকল সদস্য একে অপরকে আন্তরিকভাবে সম্মান ও শ্রদ্ধা করবেন।</li>
+              <li>মতপার্থক্য হলে আলোচনার মাধ্যমে সমাধান করতে হবে — কোনো বিরোধ বাইরে নেওয়া যাবে না।</li>
+              <li>সংগঠনের স্বার্থকে ব্যক্তিস্বার্থের উপরে স্থান দেওয়া প্রতিটি সদস্যের নৈতিক দায়িত্ব।</li>
+            </ul>
+          </div>
+          <div class="terms-card">
+            <h4 class="terms-card__title"><span class="terms-card__icon">🚪</span> সংগঠন ত্যাগের বিধান</h4>
+            <ul class="terms-card__list">
+              <li>কোনো সদস্য সংগঠন ছেড়ে যেতে চাইলে তা সকল সদস্যের সভায় আলোচনার মাধ্যমে নিষ্পত্তি করতে হবে।</li>
+              <li>সংগঠন ত্যাগের ক্ষেত্রে জমানো অর্থের বিষয়টি সংগঠনের লক্ষ্য ও সার্বিক অবস্থা বিবেচনা করে নির্ধারিত হবে।</li>
+              <li>সংগঠনের কোনো গোপনীয় তথ্য, পরিকল্পনা বা আর্থিক বিষয় বাইরে প্রকাশ করা সম্পূর্ণ নিষিদ্ধ।</li>
             </ul>
           </div>
         </div>
@@ -918,7 +996,7 @@ export default {
 
 /* ─── MEMBERS ────────────────────────────────────────────────── */
 .members {
-  background: #0d1320;
+  background: #060a14;
   padding: 48px 24px 64px;
 }
 .members__wrap {
@@ -1037,6 +1115,40 @@ export default {
   min-width: 150px;
   flex-shrink: 0;
 }
+
+.mrow__share-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 72px;
+  background: rgba(99,102,241,0.1);
+  border: 1px solid rgba(99,102,241,0.35);
+  border-radius: 14px;
+  padding: 8px 14px;
+  gap: 2px;
+}
+.share-num {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, #a5b4fc, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.share-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #6366f1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.share-lbl i { font-size: 9px; }
 .mrow__name {
   font-size: 15px;
   font-weight: 600;
@@ -1062,29 +1174,6 @@ export default {
   flex-shrink: 0;
 }
 
-.mrow__rank {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 30px;
-}
-.rank-1 {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #fff;
-}
-.rank-2 {
-  background: linear-gradient(135deg, #94a3b8, #64748b);
-  color: #fff;
-}
-.rank-3 {
-  background: linear-gradient(135deg, #b45309, #92400e);
-  color: #fff;
-}
-.rank-4 {
-  background: rgba(99, 102, 241, 0.15);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.3);
-}
 
 .mrow__btn {
   background: rgba(99, 102, 241, 0.12);
@@ -1160,7 +1249,7 @@ export default {
   color: #f87171;
   border: 1px solid rgba(239, 68, 68, 0.22);
 }
-.pill--clear {
+.pill--complete {
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.22);
