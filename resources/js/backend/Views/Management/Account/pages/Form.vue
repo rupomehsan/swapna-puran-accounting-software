@@ -61,6 +61,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import { mapActions, mapState } from "pinia";
 import { store } from "../store";
 import setup from "../setup";
@@ -75,6 +76,7 @@ export default {
   created: async function () {
     let id = (this.param_id = this.$route.params.id);
     this.reset_fields();
+    await this.load_parents();
     if (id) {
       this.set_fields(id);
     }
@@ -91,6 +93,35 @@ export default {
       this.form_fields.forEach((item) => {
         item.value = "";
       });
+    },
+
+    async load_parents() {
+      try {
+        const res = await axios.get(`${location.origin}/api/v1/accounts`, {
+          params: { get_all: 1, limit: 500, status: "active" },
+        });
+        const raw = res.data?.data ?? {};
+        const accounts = Object.values(raw).filter(
+          (a) => a && typeof a === "object" && a.id
+        );
+        const list = accounts.map((a) => ({
+          label: `${a.account_code ?? ""} — ${a.account_name ?? ""}`.trim(),
+          value: a.id,
+        }));
+        // Don't allow selecting the current record as its own parent
+        const filtered = this.param_id
+          ? list.filter(
+              (o) => String(o.value) !== String(this.$route.params.id) &&
+                     accounts.find(
+                       (acc) => acc.id === o.value && acc.slug !== this.$route.params.id
+                     )
+            )
+          : list;
+        const field = this.form_fields.find((f) => f.name === "parent_id");
+        if (field) field.data_list = filtered;
+      } catch (e) {
+        console.warn("Could not load parent accounts:", e);
+      }
     },
     set_fields: async function (id) {
       this.param_id = id;

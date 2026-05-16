@@ -16,9 +16,9 @@ const setup: setup_type = {
   route_prefix: "User",
   route_path: "user",
 
-  select_fields: ["id", "name", "phone", "email", "image","number_of_share", "join_date", "role_id", "slug", "status", "created_at"],
+  select_fields: ["id", "name","number_of_share", "phone", "email", "image","number_of_share", "join_date", "role_id", "slug", "status", "created_at"],
 
-  sort_by_cols: ["id", "name", "email", "image", "role_id", "created_at"],
+  sort_by_cols: ["id", "name","number_of_share", "email", "image", "role_id", "created_at"],
 
   layout_title: prefix + " Management",
   page_title: `${prefix} Management`,

@@ -30,21 +30,48 @@
           </div>
         </div>
         <div class="card-body card_body_fixed_height">
+          <!-- User Information -->
           <div
             class="d-flex justify-content-between align-items-center pb-2 section-title"
           >
-            <h5 class="m-0">User Information</h5>
+            <h5 class="m-0"><i class="fa fa-user mr-2"></i>User Information</h5>
           </div>
           <div class="row">
             <template
-              v-for="(form_field, index) in form_fields"
-              v-bind:key="index"
+              v-for="(form_field, index) in userFields"
+              v-bind:key="'u-' + index"
             >
               <common-input
                 :label="form_field.label"
                 :type="form_field.type"
                 :name="form_field.name"
                 :multiple="form_field.multiple"
+                :accept="form_field.accept"
+                :value="form_field.value"
+                :data_list="form_field.data_list"
+                :is_visible="form_field.is_visible"
+                :class="form_field.class"
+              />
+            </template>
+          </div>
+
+          <!-- Nominee Information -->
+          <div
+            class="d-flex justify-content-between align-items-center pb-2 section-title mt-3"
+          >
+            <h5 class="m-0"><i class="fa fa-user-shield mr-2"></i>Nominee Information (নমিনি তথ্য)</h5>
+          </div>
+          <div class="row">
+            <template
+              v-for="(form_field, index) in nomineeFields"
+              v-bind:key="'n-' + index"
+            >
+              <common-input
+                :label="form_field.label"
+                :type="form_field.type"
+                :name="form_field.name"
+                :multiple="form_field.multiple"
+                :accept="form_field.accept"
                 :value="form_field.value"
                 :data_list="form_field.data_list"
                 :is_visible="form_field.is_visible"
@@ -183,6 +210,12 @@ export default {
     ...mapState(store, {
       item: "item",
     }),
+    userFields() {
+      return this.form_fields.filter((f) => f.section !== "nominee");
+    },
+    nomineeFields() {
+      return this.form_fields.filter((f) => f.section === "nominee");
+    },
   },
 };
 </script>

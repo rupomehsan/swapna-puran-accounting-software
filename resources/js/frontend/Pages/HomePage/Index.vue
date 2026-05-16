@@ -501,7 +501,7 @@ export default {
   },
   methods: {
     fmt(v) {
-      return Number(v || 0).toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return Number(v || 0).toLocaleString("en-BD", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     },
     fmtDate(d) {
       if (!d) return "—";

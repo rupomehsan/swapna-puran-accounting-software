@@ -29,7 +29,11 @@ class UpdateData
                 $requestData['image'] = uploader($image, 'uploads/users');
             }
 
-        
+            // Handle nominee image upload
+            if ($request->hasFile('nominee_image')) {
+                $requestData['nominee_image'] = uploader($request->file('nominee_image'), 'uploads/users/nominees');
+            }
+
             $data->update($requestData);
 
          

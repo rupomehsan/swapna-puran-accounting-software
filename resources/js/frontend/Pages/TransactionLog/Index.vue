@@ -168,7 +168,7 @@ export default {
     },
   },
   methods: {
-    fmt(n) { return Number(n || 0).toLocaleString('en-BD', { minimumFractionDigits: 2 }); },
+    fmt(n) { return Number(n || 0).toLocaleString('en-BD', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); },
     fDate(d) {
       if (!d) return '—';
       return new Date(d).toLocaleDateString('en-BD', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });

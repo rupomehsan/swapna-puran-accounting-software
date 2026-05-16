@@ -49,7 +49,10 @@ class DataUpdateValidation extends FormRequest
             'image' => 'nullable | sometimes',
             'number_of_share' => 'required',
             'join_date' => 'required',
-            'status' => ['sometimes', Rule::in(['active', 'inactive'])],
+            'nominee_name'     => 'nullable|sometimes|string|max:100',
+            'nominee_relation' => 'nullable|sometimes|string|max:50',
+            'nominee_nid'      => 'nullable|sometimes|string|max:50',
+            'nominee_image'    => 'nullable|sometimes',
             'password' => 'nullable|string|min:6',
             'status' => ['sometimes', Rule::in(['active', 'inactive'])],
         ];

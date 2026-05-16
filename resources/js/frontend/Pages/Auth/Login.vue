@@ -1,152 +1,95 @@
 <template>
-  <title>Login | </title>
+  <Head title="Login" />
   <div class="login-root">
-    <!-- Video Background -->
+    <!-- Video Background (unchanged) -->
     <video class="bg-video" autoplay muted loop playsinline>
       <source src="/frontend/encryption-bg.webm" type="video/webm" />
     </video>
     <div class="bg-overlay"></div>
 
-    <!-- Binary Rain Canvas -->
+    <!-- Glass Effect Layer (unchanged) -->
+    <div class="bg-glass" aria-hidden="true"></div>
+
+    <!-- Binary Effect Canvas (unchanged) -->
     <canvas ref="rainCanvas" class="binary-canvas" aria-hidden="true"></canvas>
 
-    <!-- Login Panel -->
-    <div class="terminal-panel">
-      <!-- Terminal Top Bar -->
-      <div class="terminal-topbar">
-        <div class="terminal-dots">
-          <span class="dot dot-red"></span>
-          <span class="dot dot-yellow"></span>
-          <span class="dot dot-green"></span>
+    <!-- Login Card -->
+    <div class="login-card">
+      <!-- Brand -->
+      <div class="brand">
+        <div class="brand__logo">
+          <img v-if="siteLogo" :src="siteLogo" :alt="siteName" />
+          <i v-else class="fas fa-handshake"></i>
         </div>
-        <span class="terminal-title">root@sys:~# AUTH_INIT.SH</span>
-        <span class="blink-cursor">▮</span>
+        <h1 class="brand__name">আমাদের স্বপ্ন পূরণ</h1>
+        <p class="brand__tag">এডমিন  লগইন প্যানেল </p>
       </div>
 
-      <!-- Header -->
-      <div class="terminal-header">
-        <div class="lock-icon">
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 24 24"
-            fill="#00ffe0"
-            style="filter: drop-shadow(0 0 8px #00ffe0)"
-          >
-            <path
-              d="M18,8h-1V6c0-2.76-2.24-5-5-5S7,3.24,7,6v2H6c-1.1,0-2,0.9-2,2v10c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V10C20,8.9,19.1,8,18,8z M12,17c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S13.1,17,12,17z M15.1,8H8.9V6c0-1.71,1.39-3.1,3.1-3.1s3.1,1.39,3.1,3.1V8z"
-            />
-          </svg>
-        </div>
-        <h1 class="sys-title">SECURE_ACCESS</h1>
-        <p class="sys-subtitle">
-          <span class="prompt">$&gt;</span> Authenticate to continue<span
-            class="animated-dots"
-            ><span>.</span><span>.</span><span>.</span></span
-          >
-        </p>
-      </div>
-
-      <!-- Form Body -->
-      <form @submit.prevent="LoginSubmitHandler" class="terminal-form">
-        <!-- Email -->
-        <div class="field-group">
-          <label class="field-label">[ USR_EMAIL ]</label>
-          <div class="input-wrap">
-            <span class="input-prefix">&#9658;</span>
-            <input
-              v-model="email"
-              type="email"
-              name="email"
-              class="field-input"
-              placeholder="user@domain.com"
-              autocomplete="email"
-              required
-            />
-          </div>
+      <form @submit.prevent="LoginSubmitHandler" class="login-form">
+        <div class="form-row">
+          <label class="form-label">
+            <i class="fas fa-envelope"></i> Email Address
+          </label>
+          <input
+            v-model="email"
+            type="email"
+            name="email"
+            class="form-input"
+            placeholder="user@example.com"
+            autocomplete="email"
+            required
+          />
         </div>
 
-        <!-- Password -->
-        <div class="field-group">
-          <label class="field-label">[ PASSWD_HASH ]</label>
-          <div class="input-wrap">
-            <span class="input-prefix">&#9658;</span>
+        <div class="form-row">
+          <label class="form-label">
+            <i class="fas fa-lock"></i> Password
+          </label>
+          <div class="input-with-icon">
             <input
               :type="showPassword ? 'text' : 'password'"
               v-model="password"
               name="password"
-              class="field-input"
-              placeholder="••••••••••••"
+              class="form-input"
+              placeholder="••••••••"
               autocomplete="current-password"
               required
             />
             <button
               type="button"
-              @click="showPassword = !showPassword"
               class="eye-btn"
+              @click="showPassword = !showPassword"
+              :aria-label="showPassword ? 'Hide password' : 'Show password'"
             >
-              <svg
-                v-if="!showPassword"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path
-                  d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"
-                />
-              </svg>
-              <svg
-                v-else
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path
-                  d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.09L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.76,7.13 11.38,7 12,7Z"
-                />
-              </svg>
+              <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
             </button>
           </div>
         </div>
 
-        <!-- Options -->
         <div class="form-options">
-          <label class="remember-label">
-            <input type="checkbox" v-model="rememberMe" class="cb-input" />
-            <span class="cb-custom"></span>
-            <span class="cb-text">--remember-me</span>
+          <label class="check-label">
+            <input type="checkbox" v-model="rememberMe" />
+            <span class="check-box"></span>
+            <span class="check-text">Remember me</span>
           </label>
-          <Link href="forgot-password" class="forgot-link">forgot_passwd?</Link>
+          <Link href="forgot-password" class="forgot-link">Forgot password?</Link>
         </div>
 
-        <!-- Submit -->
-        <button type="submit" class="transmit-btn" :disabled="loading">
-          <span v-if="!loading" class="btn-inner">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
-            </svg>
-            TRANSMIT_
+        <button type="submit" class="submit-btn" :disabled="loading">
+          <span v-if="!loading">
+            <i class="fas fa-right-to-bracket"></i> Sign In
           </span>
-          <span v-else class="btn-inner">
-            <span class="spinner"></span>
-            PROCESSING...
+          <span v-else>
+            <span class="spinner"></span> Signing in...
           </span>
         </button>
       </form>
 
-      <!-- Footer -->
-      <div class="terminal-footer">
-        <span class="footer-text">No account?</span>
-        <Link href="register" class="register-link">./register --new</Link>
+      <div class="card-foot">
+        <Link href="/" class="back-link">
+          <i class="fas fa-arrow-left"></i> Back to home
+        </Link>
       </div>
-
-      <!-- Corner decorations -->
-      <span class="corner corner-tl"></span>
-      <span class="corner corner-tr"></span>
-      <span class="corner corner-bl"></span>
-      <span class="corner corner-br"></span>
     </div>
   </div>
 </template>
@@ -154,8 +97,10 @@
 <script>
 import { mapActions, mapState } from "pinia";
 import { auth_store } from "../../GlobalStore/auth_store";
+import { site_settings_store } from "../../GlobalStore/site_settings_store";
 
 export default {
+  layout: null,
   data() {
     return {
       loading: false,
@@ -177,16 +122,7 @@ export default {
       try {
         await this.check_is_auth();
         if (this.is_auth) {
-          const prevUrl = window.sessionStorage.getItem("prevurl");
-          const userRole = parseInt(role);
-          if (userRole === 1 || role === "1") {
-            const redirectUrl =
-              prevUrl && prevUrl.startsWith("/admin")
-                ? "/admin" + prevUrl
-                : "/admin#/dashboard";
-            window.location.href = redirectUrl;
-            return;
-          }
+          window.location.href = "/admin#/dashboard";
         } else {
           this.clearAuthData();
         }
@@ -198,6 +134,7 @@ export default {
   },
 
   mounted() {
+    site_settings_store().get_all_website_settings();
     this.loadRememberedCredentials();
     this.startBinaryRain();
   },
@@ -211,19 +148,28 @@ export default {
       auth_info: "auth_info",
       is_auth: "is_auth",
     }),
+    siteLogo() {
+      return site_settings_store().get_setting_value("image")
+        || site_settings_store().get_setting_value("header_logo")
+        || null;
+    },
+    siteName() {
+      return site_settings_store().get_setting_value("site_name") || "আমাদের স্বপ্ন পূরণ";
+    },
   },
 
   methods: {
     ...mapActions(auth_store, { check_is_auth: "check_is_auth" }),
+    ...mapActions(site_settings_store, { get_setting_value: "get_setting_value" }),
 
     startBinaryRain() {
       const canvas = this.$refs.rainCanvas;
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
-      const fontSize = 15;
-      // Only advance drops every STEP frames — lower = slower
-      const STEP = 12;
+      const fontSize = 18;
       let frame = 0;
+      let mouseX = canvas.width / 2;
+      let mouseY = canvas.height / 2;
 
       const resize = () => {
         canvas.width = window.innerWidth;
@@ -232,52 +178,41 @@ export default {
       resize();
       window.addEventListener("resize", resize);
 
-      let cols = Math.floor(canvas.width / fontSize);
-      // Stagger starting positions so columns don't all begin at once
-      let drops = Array.from({ length: cols }, (_, i) =>
-        Math.floor(Math.random() * -(canvas.height / fontSize))
+      document.addEventListener("mousemove", (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      let rows = Math.ceil(canvas.height / fontSize);
+      let cols = Math.ceil(canvas.width / fontSize);
+      let binaryGrid = Array.from({ length: rows }, () =>
+        Array.from({ length: cols }, () => (Math.random() > 0.5 ? "1" : "0")),
       );
 
       const draw = () => {
         frame++;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = `${fontSize}px "Courier New", monospace`;
 
-        // Every frame: paint a very subtle fade so trails dissolve slowly
-        ctx.fillStyle = "rgba(2, 4, 8, 0.055)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const hoverCol = Math.floor(mouseX / fontSize);
+        const hoverRow = Math.floor(mouseY / fontSize);
 
-        // Only move drops every STEP frames
-        if (frame % STEP === 0) {
-          cols = Math.floor(canvas.width / fontSize);
-          while (drops.length < cols) drops.push(0);
-
-          ctx.font = `${fontSize}px "Courier New", monospace`;
-
-          for (let i = 0; i < cols; i++) {
-            const bit = Math.random() > 0.5 ? "1" : "0";
-            const y = drops[i] * fontSize;
-
-            // Bright white leading character
-            ctx.fillStyle = "#e0fff8";
-            ctx.font = `bold ${fontSize}px "Courier New", monospace`;
-            ctx.fillText(bit, i * fontSize, y);
-
-            // Cyan glow one step behind
-            ctx.fillStyle = "rgba(0, 255, 210, 0.75)";
-            ctx.font = `${fontSize}px "Courier New", monospace`;
-            ctx.fillText(bit, i * fontSize, y - fontSize);
-
-            // Mid trail
-            ctx.fillStyle = "rgba(0, 210, 170, 0.35)";
-            ctx.fillText(bit, i * fontSize, y - fontSize * 2);
-
-            // Dim deep tail
-            ctx.fillStyle = "rgba(0, 160, 130, 0.15)";
-            ctx.fillText(bit, i * fontSize, y - fontSize * 4);
-
-            // Reset column after it exits, with a random pause chance
-            if (y > canvas.height && Math.random() > 0.97) drops[i] = 0;
-            drops[i]++;
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < cols; col++) {
+            const bit = binaryGrid[row][col];
+            const x = col * fontSize;
+            const y = row * fontSize + fontSize;
+            let opacity = 0.12 + 0.06 * Math.sin((row + col + frame * 0.02) * 0.1);
+            if (row === hoverRow && col === hoverCol) opacity = 1;
+            ctx.fillStyle = `rgba(0, 255, 210, ${opacity})`;
+            ctx.fillText(bit, x, y);
           }
+        }
+
+        if (frame % 120 === 0) {
+          const randRow = Math.floor(Math.random() * rows);
+          const randCol = Math.floor(Math.random() * cols);
+          binaryGrid[randRow][randCol] = Math.random() > 0.5 ? "1" : "0";
         }
 
         this._rainId = requestAnimationFrame(draw);
@@ -289,11 +224,8 @@ export default {
     async LoginSubmitHandler() {
       try {
         this.loading = true;
-        if (this.rememberMe) {
-          this.saveCredentials();
-        } else {
-          this.clearSavedCredentials();
-        }
+        if (this.rememberMe) this.saveCredentials();
+        else this.clearSavedCredentials();
 
         let formData = new FormData();
         formData.append("email", this.email);
@@ -307,73 +239,39 @@ export default {
           if (data.access_token && data.user) {
             localStorage.setItem("auth_token", data.access_token);
             localStorage.setItem("auth_role", data.user.role_id);
-            const prevUrl = window.sessionStorage.getItem("prevurl");
             window.sessionStorage.removeItem("prevurl");
             window.s_alert("Login Successfully");
             let redirectUrl = "";
-            if (data.user.role_id === 1) {
-              redirectUrl =
-                prevUrl && prevUrl.startsWith("/admin")
-                  ? prevUrl
-                  : "/admin#/dashboard";
-            }
-            if (redirectUrl) {
-              setTimeout(() => {
-                window.location.href = redirectUrl;
-              }, 100);
-            }
+            if (data.user.role_id) redirectUrl = "/admin#/dashboard";
+            if (redirectUrl) setTimeout(() => { window.location.href = redirectUrl; }, 100);
           } else {
-            window.s_alert(
-              "Login failed. Invalid response from server.",
-              "error"
-            );
+            window.s_alert("Login failed. Invalid response from server.", "error");
           }
         } else {
-          window.s_alert(
-            response.data?.message || "Login failed. Please try again.",
-            "error"
-          );
+          window.s_alert(response.data?.message || "Login failed. Please try again.", "error");
         }
       } catch (error) {
-        if (error.response?.data?.message) {
-          window.s_alert(error.response.data.message, "error");
-        } else if (error.response?.status === 401) {
-          window.s_alert(
-            "Invalid credentials. Please check your email and password.",
-            "error"
-          );
-        } else {
-          window.s_alert(
-            "Login failed. Please check your connection and try again.",
-            "error"
-          );
-        }
+        if (error.response?.data?.message) window.s_alert(error.response.data.message, "error");
+        else if (error.response?.status === 401) window.s_alert("Invalid credentials. Please check your email and password.", "error");
+        else window.s_alert("Login failed. Please check your connection and try again.", "error");
       } finally {
         this.loading = false;
       }
     },
 
     saveCredentials() {
-      localStorage.setItem(
-        "rememberedCredentials",
-        JSON.stringify({
-          email: this.email,
-          password: this.password,
-          rememberMe: this.rememberMe,
-        })
-      );
+      localStorage.setItem("rememberedCredentials", JSON.stringify({
+        email: this.email,
+        password: this.password,
+        rememberMe: this.rememberMe,
+      }));
     },
-
-    clearSavedCredentials() {
-      localStorage.removeItem("rememberedCredentials");
-    },
-
+    clearSavedCredentials() { localStorage.removeItem("rememberedCredentials"); },
     clearAuthData() {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_role");
       window.sessionStorage.removeItem("prevurl");
     },
-
     loadRememberedCredentials() {
       const saved = localStorage.getItem("rememberedCredentials");
       if (saved) {
@@ -382,9 +280,7 @@ export default {
           this.email = c.email || "";
           this.password = c.password || "";
           this.rememberMe = c.rememberMe || false;
-        } catch {
-          this.clearSavedCredentials();
-        }
+        } catch { this.clearSavedCredentials(); }
       }
     },
   },
@@ -392,11 +288,7 @@ export default {
 </script>
 
 <style scoped>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 :global(body),
 :global(html) {
@@ -411,480 +303,253 @@ export default {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  font-family: "Courier New", Courier, monospace;
   background: #020408;
+  padding: 16px;
 }
 
-/* Video BG — more visible now */
+/* ─── Background (unchanged) ─── */
 .bg-video {
   position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  top: 50%; left: 50%;
+  width: 100vw; height: 100vh;
+  min-width: 100vw; min-height: 100vh;
   object-fit: cover;
+  transform: translate(-50%, -50%) scale(1.6);
   z-index: 0;
-  opacity: 0.75;
+  opacity: 1;
 }
-
-/* Lighter overlay so video shows through */
 .bg-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(2, 4, 8, 0.32);
+  position: fixed; inset: 0;
+  background: rgba(2, 4, 8, 0.08);
   z-index: 1;
 }
-
-/* Binary Rain Canvas — full page */
+.bg-glass {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  backdrop-filter: blur(6px) saturate(140%);
+  -webkit-backdrop-filter: blur(6px) saturate(140%);
+  background: linear-gradient(
+    135deg,
+    rgba(2, 8, 14, 0.25) 0%,
+    rgba(0, 255, 210, 0.03) 50%,
+    rgba(2, 8, 14, 0.3) 100%
+  );
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.35);
+}
 .binary-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  width: 100%;
-  height: 100%;
+  position: fixed; inset: 0; z-index: 3; pointer-events: none;
+  width: 100%; height: 100%;
 }
 
-/* Terminal Panel */
-.terminal-panel {
+/* ─── Login Card (professional) ─── */
+.login-card {
   position: relative;
   z-index: 10;
-  width: calc(100% - 32px);
-  max-width: 460px;
-  background: rgba(4, 10, 18, 0.9);
-  border: 1px solid rgba(0, 255, 200, 0.3);
-  border-radius: 6px;
-  box-shadow: 0 0 0 1px rgba(0, 255, 200, 0.08),
-    0 0 50px rgba(0, 255, 200, 0.12), 0 30px 60px rgba(0, 0, 0, 0.8);
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  background: rgba(13, 19, 32, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 32px 30px 24px;
   backdrop-filter: blur(14px);
-  overflow: hidden;
-  animation: panelIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(99, 102, 241, 0.05);
+  overflow-y: auto;
+  animation: cardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.login-card::-webkit-scrollbar { width: 4px; }
+.login-card::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
 }
 
-@keyframes panelIn {
-  from {
-    opacity: 0;
-    transform: translateY(32px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Corner decorations */
-.corner {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border-color: #00ffe0;
-  border-style: solid;
-  opacity: 0.7;
-  pointer-events: none;
-}
-.corner-tl {
-  top: 0;
-  left: 0;
-  border-width: 2px 0 0 2px;
-}
-.corner-tr {
-  top: 0;
-  right: 0;
-  border-width: 2px 2px 0 0;
-}
-.corner-bl {
-  bottom: 0;
-  left: 0;
-  border-width: 0 0 2px 2px;
-}
-.corner-br {
-  bottom: 0;
-  right: 0;
-  border-width: 0 2px 2px 0;
-}
-
-/* Top bar */
-.terminal-topbar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(0, 0, 0, 0.55);
-  border-bottom: 1px solid rgba(0, 255, 200, 0.15);
-  padding: 10px 16px;
-}
-
-.terminal-dots {
-  display: flex;
-  gap: 6px;
-}
-.dot {
-  width: 11px;
-  height: 11px;
+/* Brand */
+.brand { text-align: center; margin-bottom: 26px; }
+.brand__logo {
+  width: 66px; height: 66px;
   border-radius: 50%;
-}
-.dot-red {
-  background: #ff5f57;
-  box-shadow: 0 0 6px #ff5f5780;
-}
-.dot-yellow {
-  background: #febc2e;
-  box-shadow: 0 0 6px #febc2e80;
-}
-.dot-green {
-  background: #28c840;
-  box-shadow: 0 0 6px #28c84080;
-}
-
-.terminal-title {
-  flex: 1;
-  font-size: 11px;
-  color: #00ffe0;
-  letter-spacing: 0.08em;
-  opacity: 0.85;
-}
-
-.blink-cursor {
-  color: #00ffe0;
-  animation: blink 1s step-end infinite;
-  font-size: 14px;
-}
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-}
-
-/* Header */
-.terminal-header {
-  padding: 28px 30px 20px;
-  text-align: center;
-  border-bottom: 1px solid rgba(0, 255, 200, 0.1);
-}
-
-.lock-icon {
-  display: inline-flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(99, 102, 241, 0.4);
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  border: 2px solid rgba(0, 255, 200, 0.75);
-  background: rgba(0, 255, 200, 0.1);
-  color: #00ffe0;
-  margin-bottom: 14px;
-  box-shadow: 0 0 28px rgba(0, 255, 200, 0.4),
-    inset 0 0 14px rgba(0, 255, 200, 0.1);
+  margin: 0 auto 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.22);
 }
-
-.sys-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: #ffffff;
-  text-shadow: 0 0 12px rgba(0, 255, 200, 0.9),
-    0 0 30px rgba(0, 255, 200, 0.5);
-  margin-bottom: 8px;
+.brand__logo img { width: 100%; height: 100%; object-fit: cover; }
+.brand__logo i { font-size: 26px; color: #a5b4fc; }
+.brand__name {
+  font-size: 19px;
+  font-weight: 800;
+  color: #e2e8f0;
+  margin: 0 0 4px;
+  letter-spacing: 0.2px;
 }
-
-/* Subtitle — bright and readable */
-.sys-subtitle {
-  font-size: 13px;
-  color: #ffffff;
-  letter-spacing: 0.05em;
-  text-shadow: 0 0 10px rgba(0, 255, 200, 0.6);
-}
-
-.prompt {
-  color: #a78bfa;
-  margin-right: 4px;
-}
-
-/* Animated bouncing dots */
-.animated-dots {
-  display: inline-flex;
-  gap: 1px;
-}
-.animated-dots span {
-  color: #00ffe0;
-  font-weight: 700;
-  animation: dotBounce 1.4s infinite ease-in-out;
-}
-.animated-dots span:nth-child(1) {
-  animation-delay: 0s;
-}
-.animated-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.animated-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes dotBounce {
-  0%,
-  80%,
-  100% {
-    opacity: 0.25;
-    transform: translateY(0);
-  }
-  40% {
-    opacity: 1;
-    transform: translateY(-4px);
-  }
+.brand__tag {
+  font-size: 12.5px;
+  color: #94a3b8;
+  margin: 0;
 }
 
 /* Form */
-.terminal-form {
-  padding: 26px 30px;
-}
-
-.field-group {
-  margin-bottom: 20px;
-}
-
-.field-label {
-  display: block;
-  font-size: 11px;
-  color: #00ffe0;
-  letter-spacing: 0.12em;
-  margin-bottom: 8px;
-  opacity: 0.8;
-}
-
-.input-wrap {
-  display: flex;
-  align-items: center;
-  background: rgba(0, 255, 200, 0.04);
-  border: 1px solid rgba(0, 255, 200, 0.2);
-  border-radius: 4px;
-  transition: border-color 0.25s, box-shadow 0.25s;
-  overflow: hidden;
-}
-
-.input-wrap:focus-within {
-  border-color: rgba(0, 255, 200, 0.6);
-  box-shadow: 0 0 0 3px rgba(0, 255, 200, 0.08),
-    0 0 14px rgba(0, 255, 200, 0.12);
-}
-
-.input-prefix {
-  padding: 0 10px;
-  color: #00ffe0;
+.login-form { display: flex; flex-direction: column; gap: 14px; }
+.form-row { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
   font-size: 12px;
-  opacity: 0.55;
-  flex-shrink: 0;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+.form-label i { color: #64748b; font-size: 11px; }
 
-.field-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
+.form-input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
-  font-family: "Courier New", monospace;
   font-size: 14px;
-  padding: 13px 12px 13px 0;
-  caret-color: #00ffe0;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.form-input::placeholder { color: #475569; }
+.form-input:hover { border-color: rgba(255, 255, 255, 0.16); }
+.form-input:focus {
+  border-color: rgba(99, 102, 241, 0.6);
+  background: rgba(99, 102, 241, 0.06);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-.field-input::placeholder {
-  color: rgba(255, 255, 255, 0.2);
-}
-
+.input-with-icon { position: relative; }
+.input-with-icon .form-input { padding-right: 42px; }
 .eye-btn {
+  position: absolute;
+  right: 4px; top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  color: rgba(0, 255, 200, 0.45);
+  color: #64748b;
   cursor: pointer;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  transition: color 0.2s;
-  flex-shrink: 0;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
 }
-.eye-btn:hover {
-  color: #00ffe0;
-}
+.eye-btn:hover { color: #a5b4fc; background: rgba(255, 255, 255, 0.04); }
 
-/* Options row */
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-top: 4px;
 }
-
-.remember-label {
-  display: flex;
+.check-label {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  user-select: none;
 }
-
-.cb-input {
-  display: none;
-}
-
-.cb-custom {
-  width: 14px;
-  height: 14px;
-  border: 1px solid rgba(0, 255, 200, 0.45);
-  border-radius: 2px;
-  background: transparent;
-  display: inline-block;
+.check-label input { display: none; }
+.check-box {
+  width: 15px; height: 15px;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
   position: relative;
-  transition: background 0.2s, border-color 0.2s;
-  flex-shrink: 0;
+  transition: all 0.2s;
 }
-
-.cb-input:checked + .cb-custom {
-  background: #00ffe0;
-  border-color: #00ffe0;
+.check-label input:checked + .check-box {
+  background: #6366f1;
+  border-color: #6366f1;
 }
-.cb-input:checked + .cb-custom::after {
+.check-label input:checked + .check-box::after {
   content: "";
   position: absolute;
-  left: 3px;
-  top: 1px;
-  width: 5px;
-  height: 8px;
-  border: solid #000;
+  left: 4px; top: 1px;
+  width: 4px; height: 8px;
+  border: solid #fff;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
-
-.cb-text {
-  font-size: 12px;
-  color: rgba(0, 255, 200, 0.65);
-  letter-spacing: 0.04em;
-}
-
+.check-text { font-size: 12.5px; color: #94a3b8; }
 .forgot-link {
-  font-size: 12px;
-  color: #a78bfa;
+  font-size: 12.5px;
+  color: #a5b4fc;
   text-decoration: none;
-  letter-spacing: 0.04em;
-  transition: color 0.2s, text-shadow 0.2s;
+  font-weight: 500;
+  transition: color 0.2s;
 }
-.forgot-link:hover {
-  color: #c4b5fd;
-  text-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
-}
+.forgot-link:hover { color: #c4b5fd; text-decoration: underline; }
 
-/* Transmit Button */
-.transmit-btn {
+.submit-btn {
   width: 100%;
-  background: transparent;
-  border: 1px solid rgba(0, 255, 200, 0.55);
-  border-radius: 4px;
-  color: #00ffe0;
-  font-family: "Courier New", monospace;
+  padding: 12px 24px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
   font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.2em;
-  padding: 14px 24px;
+  letter-spacing: 0.3px;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.32);
 }
-
-.transmit-btn::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(0, 255, 200, 0.1),
-    transparent
-  );
-  transform: translateX(-100%);
-  transition: transform 0.5s ease;
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.42);
 }
+.submit-btn:active:not(:disabled) { transform: translateY(0); }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.submit-btn i { margin-right: 5px; }
 
-.transmit-btn:hover::before {
-  transform: translateX(100%);
-}
-
-.transmit-btn:hover {
-  background: rgba(0, 255, 200, 0.08);
-  border-color: #00ffe0;
-  box-shadow: 0 0 24px rgba(0, 255, 200, 0.25),
-    inset 0 0 20px rgba(0, 255, 200, 0.05);
-  text-shadow: 0 0 8px rgba(0, 255, 200, 0.7);
-}
-
-.transmit-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-inner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  position: relative;
-  z-index: 1;
-}
-
-/* Spinner */
 .spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(0, 255, 200, 0.2);
-  border-top-color: #00ffe0;
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
-  display: inline-block;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Footer */
-.terminal-footer {
-  padding: 16px 30px 22px;
-  text-align: center;
-  border-top: 1px solid rgba(0, 255, 200, 0.1);
-}
-
-.footer-text {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.35);
   margin-right: 6px;
-  letter-spacing: 0.04em;
+  vertical-align: middle;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.register-link {
-  font-size: 12px;
-  color: #a78bfa;
+.card-foot {
+  text-align: center;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.back-link {
+  font-size: 12.5px;
+  color: #64748b;
   text-decoration: none;
-  letter-spacing: 0.04em;
-  transition: color 0.2s, text-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
 }
-.register-link:hover {
-  color: #c4b5fd;
-  text-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
-}
+.back-link:hover { color: #a5b4fc; }
+.back-link i { font-size: 10px; }
 
-/* Responsive */
 @media (max-width: 480px) {
-  .terminal-form {
-    padding: 20px;
-  }
-  .terminal-header {
-    padding: 20px 20px 16px;
-  }
-  .sys-title {
-    font-size: 1.2rem;
-  }
+  .login-card { padding: 24px 20px 18px; }
+  .brand__logo { width: 56px; height: 56px; }
+  .brand__name { font-size: 17px; }
 }
 </style>

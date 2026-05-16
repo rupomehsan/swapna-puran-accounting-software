@@ -134,7 +134,7 @@ export default {
     filteredTotal(){ return this.filtered.reduce((s,e)=>s+parseFloat(e.amount||0),0); },
   },
   methods:{
-    fmt(n){ return Number(n||0).toLocaleString('en-BD',{minimumFractionDigits:2}); },
+    fmt(n){ return Number(n||0).toLocaleString('en-BD',{minimumFractionDigits:0,maximumFractionDigits:0}); },
     fDate(d){ if(!d)return'—'; return new Date(d).toLocaleDateString('en-BD',{year:'numeric',month:'short',day:'2-digit'}); },
     stripHtml(h){ if(!h)return''; return h.replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim(); },
     applyDummy(){ this.entries=DUMMY; this.total=DUMMY.reduce((s,e)=>s+e.amount,0); this.apiError=true; },

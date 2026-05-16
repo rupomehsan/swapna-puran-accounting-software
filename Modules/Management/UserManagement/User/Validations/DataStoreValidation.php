@@ -50,6 +50,10 @@ class DataStoreValidation extends FormRequest
             'image' => 'nullable | sometimes',
             'number_of_share' => 'required',
             'join_date' => 'required',
+            'nominee_name'     => 'nullable|sometimes|string|max:100',
+            'nominee_relation' => 'nullable|sometimes|string|max:50',
+            'nominee_nid'      => 'nullable|sometimes|string|max:50',
+            'nominee_image'    => 'nullable|sometimes',
             'status' => ['sometimes', Rule::in(['active', 'inactive'])],
         ];
     }

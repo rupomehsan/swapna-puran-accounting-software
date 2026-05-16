@@ -220,7 +220,7 @@ export default {
     maxM(){ return this.monthlyDeposits.length?Math.max(...this.monthlyDeposits.map(r=>parseFloat(r.total||0))):1; },
   },
   methods:{
-    fmt(n){ return Number(n||0).toLocaleString('en-BD',{minimumFractionDigits:2}); },
+    fmt(n){ return Number(n||0).toLocaleString('en-BD',{minimumFractionDigits:0,maximumFractionDigits:0}); },
     pct(a,b){ return b?((a/b)*100).toFixed(1):'0.0'; },
     bw(v){ return this.maxM?Math.max(3,(parseFloat(v||0)/this.maxM)*100):0; },
     fMonth(m){ if(!m)return'—'; const[y,mo]=m.split('-'); return new Date(y,parseInt(mo)-1).toLocaleDateString('en-BD',{year:'numeric',month:'long'}); },

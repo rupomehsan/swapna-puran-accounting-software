@@ -56,6 +56,7 @@
                     </th>
                     <th class="w-10">ID</th>
                     <th>name</th>
+                    <th>Numner of Shares</th>
                     <th>phone</th>
                     <th>image</th>
                     <th>role</th>
@@ -166,6 +167,7 @@
                     </td>
                     <td>{{ index + 1 }}</td>
                     <td>{{ item.name }} </td>
+                    <td>{{ item.number_of_share }} </td>
                     <td>{{ item.phone }}</td>
                     <td>
                       <img :src="item.image" alt="" height="50" width="50" />
