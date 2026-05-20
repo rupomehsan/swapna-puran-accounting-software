@@ -51,64 +51,102 @@
 
         <!-- Profile card -->
         <div class="profile-card">
-          <div class="profile-card__left">
+          <!-- ── Top row: avatar / identity / nominee ── -->
+          <div class="pc-top">
+            <!-- Avatar -->
             <div class="profile-avatar" :style="{ background: avatarGradient }">
               <img v-if="member.image" :src="imgUrl(member.image)" :alt="member.name"
                    @error="e => e.target.style.display='none'" />
               <span v-else>{{ initials(member.name) }}</span>
             </div>
-          </div>
-          <div class="profile-card__info">
-            <div class="profile-card__badge">Member</div>
-            <h1 class="profile-card__name">{{ member.name }}</h1>
-            <div class="profile-card__meta">
-              <span v-if="member.phone"><i class="fas fa-phone-alt"></i> {{ member.phone }}</span>
-              <span v-if="member.email"><i class="fas fa-envelope"></i> {{ member.email }}</span>
-              <span><i class="fas fa-calendar-alt"></i> Joined {{ fmtDate(member.join_date || member.created_at) }}</span>
+
+            <!-- Identity -->
+            <div class="pc-identity">
+              <div class="profile-card__badge">Member</div>
+              <h1 class="profile-card__name">{{ member.name }}</h1>
+              <div class="profile-card__meta">
+                <span v-if="member.phone"><i class="fas fa-phone-alt"></i> {{ member.phone }}</span>
+                <span v-if="member.email"><i class="fas fa-envelope"></i> {{ member.email }}</span>
+                <span><i class="fas fa-calendar-alt"></i> Joined {{ fmtDate(member.join_date || member.created_at) }}</span>
+              </div>
             </div>
-            <div class="profile-card__stats">
-              <div class="ps-item ps-item--indigo">
-                <span class="ps-item__icon"><i class="fas fa-layer-group"></i></span>
-                <span class="ps-item__label">No. of Shares</span>
-                <span class="ps-item__val">
-                  {{ member.number_of_share ?? 0 }}
-                  <span v-if="stats.last_adjustment" class="share-trend-inline"
-                        :class="stats.last_adjustment.adjustment_type === 'increase' ? 'share-trend-inline--up' : 'share-trend-inline--down'">
-                    <i :class="stats.last_adjustment.adjustment_type === 'increase' ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
-                    {{ stats.last_adjustment.adjustment_type === 'increase' ? '+' : '−' }}{{ Math.abs(stats.last_adjustment.shares_delta || 0) }}
-                  </span>
+
+            <!-- Nominee panel (right) -->
+            <div class="profile-card__nominee"
+                 v-if="member.nominee_name || member.nominee_relation || member.nominee_nid || member.nominee_image">
+              <div class="pn-header">
+                <i class="fas fa-user-shield"></i>
+                <span>Nominee <small>(নমিনি)</small></span>
+              </div>
+              <div class="pn-body">
+                <div class="pn-left" v-if="member.nominee_image">
+                  <div class="pn-photo-wrap">
+                    <img :src="imgUrl(member.nominee_image)" alt="Nominee" class="pn-photo"
+                         @error="e => e.target.style.display='none'" />
+                  </div>
+                </div>
+                <div class="pn-rows">
+                  <div class="pn-row" v-if="member.nominee_name">
+                    <span class="pn-lbl"><i class="fas fa-user"></i> Name</span>
+                    <span class="pn-val">{{ member.nominee_name }}</span>
+                  </div>
+                  <div class="pn-row" v-if="member.nominee_relation">
+                    <span class="pn-lbl"><i class="fas fa-heart"></i> Relation</span>
+                    <span class="pn-val pn-val--badge">{{ nomineeRelationLabel(member.nominee_relation) }}</span>
+                  </div>
+                  <div class="pn-row" v-if="member.nominee_nid">
+                    <span class="pn-lbl"><i class="fas fa-id-card"></i> NID</span>
+                    <span class="pn-val pn-val--mono">{{ member.nominee_nid }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Bottom row: all stats ── -->
+          <div class="pc-stats">
+            <div class="ps-item ps-item--indigo">
+              <span class="ps-item__icon"><i class="fas fa-layer-group"></i></span>
+              <span class="ps-item__label">Shares</span>
+              <span class="ps-item__val">
+                {{ member.number_of_share ?? 0 }}
+                <span v-if="stats.last_adjustment" class="share-trend-inline"
+                      :class="stats.last_adjustment.adjustment_type === 'increase' ? 'share-trend-inline--up' : 'share-trend-inline--down'">
+                  <i :class="stats.last_adjustment.adjustment_type === 'increase' ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                  {{ stats.last_adjustment.adjustment_type === 'increase' ? '+' : '−' }}{{ Math.abs(stats.last_adjustment.shares_delta || 0) }}
                 </span>
-              </div>
-              <div class="ps-item ps-item--blue">
-                <span class="ps-item__icon"><i class="fas fa-piggy-bank"></i></span>
-                <span class="ps-item__label">Total Deposit</span>
-                <span class="ps-item__val">৳ {{ fmt(stats.total_deposit) }}</span>
-              </div>
-              <div class="ps-item ps-item--purple">
-                <span class="ps-item__icon"><i class="fas fa-coins"></i></span>
-                <span class="ps-item__label">Share Deposit</span>
-                <span class="ps-item__val">৳ {{ fmt(stats.total_share) }}</span>
-              </div>
-              <div class="ps-item ps-item--green">
-                <span class="ps-item__icon"><i class="fas fa-sack-dollar"></i></span>
-                <span class="ps-item__label">Extra Savings</span>
-                <span class="ps-item__val">৳ {{ fmt(stats.total_savings) }}</span>
-              </div>
-              <div class="ps-item" :class="stats.total_due > 0 ? 'ps-item--red' : 'ps-item--teal'">
-                <span class="ps-item__icon"><i :class="stats.total_due > 0 ? 'fas fa-triangle-exclamation' : 'fas fa-circle-check'"></i></span>
-                <span class="ps-item__label">{{ stats.total_due > 0 ? 'Due Amount' : 'Due Status' }}</span>
-                <span class="ps-item__val">{{ stats.total_due > 0 ? '৳ ' + fmt(stats.total_due) : '✓ Clear' }}</span>
-              </div>
-              <div v-if="isAdvancePaid(stats.paid_till)" class="ps-item ps-item--purple">
-                <span class="ps-item__icon"><i class="fas fa-calendar-check"></i></span>
-                <span class="ps-item__label">Paid Till (Advance)</span>
-                <span class="ps-item__val">{{ fmtMonth(stats.paid_till) }}</span>
-              </div>
+              </span>
             </div>
-          </div>
-          <div class="profile-card__badge-count">
-            <span class="count-ring">{{ stats.deposit_count }}</span>
-            <span class="count-label">Deposits</span>
+            <div class="ps-item ps-item--blue">
+              <span class="ps-item__icon"><i class="fas fa-piggy-bank"></i></span>
+              <span class="ps-item__label">Total Deposit</span>
+              <span class="ps-item__val">৳ {{ fmt(stats.total_deposit) }}</span>
+            </div>
+            <div class="ps-item ps-item--purple">
+              <span class="ps-item__icon"><i class="fas fa-coins"></i></span>
+              <span class="ps-item__label">Share Deposit</span>
+              <span class="ps-item__val">৳ {{ fmt(stats.total_share) }}</span>
+            </div>
+            <div class="ps-item ps-item--green">
+              <span class="ps-item__icon"><i class="fas fa-sack-dollar"></i></span>
+              <span class="ps-item__label">Extra Savings</span>
+              <span class="ps-item__val">৳ {{ fmt(stats.total_savings) }}</span>
+            </div>
+            <div class="ps-item" :class="stats.total_due > 0 ? 'ps-item--red' : 'ps-item--teal'">
+              <span class="ps-item__icon"><i :class="stats.total_due > 0 ? 'fas fa-triangle-exclamation' : 'fas fa-circle-check'"></i></span>
+              <span class="ps-item__label">{{ stats.total_due > 0 ? 'Due Amount' : 'Due Status' }}</span>
+              <span class="ps-item__val">{{ stats.total_due > 0 ? '৳ ' + fmt(stats.total_due) : '✓ Clear' }}</span>
+            </div>
+            <div class="ps-item ps-item--slate">
+              <span class="ps-item__icon"><i class="fas fa-receipt"></i></span>
+              <span class="ps-item__label">Deposits</span>
+              <span class="ps-item__val">{{ stats.deposit_count }}</span>
+            </div>
+            <div v-if="isAdvancePaid(stats.paid_till)" class="ps-item ps-item--amber">
+              <span class="ps-item__icon"><i class="fas fa-calendar-check"></i></span>
+              <span class="ps-item__label">Paid Till</span>
+              <span class="ps-item__val">{{ fmtMonth(stats.paid_till) }}</span>
+            </div>
           </div>
         </div>
 
@@ -278,6 +316,10 @@ export default {
     initials(n) {
       return (n || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
     },
+    nomineeRelationLabel(val) {
+      const map = { father: 'Father (পিতা)', mother: 'Mother (মাতা)', spouse: 'Spouse (স্বামী/স্ত্রী)', son: 'Son (পুত্র)', daughter: 'Daughter (কন্যা)', brother: 'Brother (ভাই)', sister: 'Sister (বোন)', other: 'Other (অন্যান্য)' };
+      return map[val] || val;
+    },
     stripHtml(html) {
       if (!html) return '';
       const text = String(html).replace(/<[^>]*>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
@@ -381,17 +423,22 @@ export default {
 .profile-card {
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 20px; padding: 32px 36px;
-  display: flex; align-items: flex-start; gap: 28px;
-  margin-bottom: 28px; position: relative; overflow: hidden;
+  border-radius: 20px; padding: 32px 32px 24px;
+  margin-bottom: 32px; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; gap: 24px;
 }
 .profile-card::before {
   content: ''; position: absolute;
   top: 0; left: 0; right: 0; height: 3px;
   background: linear-gradient(90deg, #6366f1, #8b5cf6, #34d399, #14b8a6);
 }
+
+/* Top row */
+.pc-top {
+  display: flex; align-items: center; gap: 24px;
+}
 .profile-avatar {
-  width: 96px; height: 96px; border-radius: 50%; flex-shrink: 0;
+  width: 92px; height: 92px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 28px; font-weight: 800; color: #fff;
   overflow: hidden; border: 3px solid rgba(99,102,241,0.4);
@@ -399,41 +446,47 @@ export default {
 }
 .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-.profile-card__info { flex: 1; }
+.pc-identity { flex: 1; min-width: 0; }
 .profile-card__badge {
-  display: inline-block; padding: 3px 12px;
+  display: inline-block; padding: 4px 14px;
   background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3);
   border-radius: 20px; font-size: 11px; font-weight: 700;
   color: #34d399; letter-spacing: 1px; text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .profile-card__name {
-  font-size: 26px; font-weight: 800; color: #f1f5f9; margin: 0 0 10px;
+  font-size: 26px; font-weight: 800; margin: 0 0 12px;
   background: linear-gradient(135deg, #e0e7ff, #a5b4fc);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .profile-card__meta {
-  display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;
+  display: flex; flex-wrap: wrap; gap: 16px;
 }
 .profile-card__meta span {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12.5px; color: #475569;
+  font-size: 13px; color: #475569;
 }
 .profile-card__meta i { font-size: 11px; color: #334155; }
 
-.profile-card__stats { display: flex; flex-wrap: wrap; gap: 12px; }
-.ps-item {
-  flex: 1; min-width: 130px;
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px; padding: 12px 16px;
-  display: flex; flex-direction: column; gap: 4px;
+/* Bottom stats row */
+.pc-stats {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
-.ps-item__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; color: #334155; }
-.ps-item__val   { font-size: 16px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+.ps-item {
+  flex: 1; min-width: 120px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ps-item__label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: #334155; }
+.ps-item__val   { font-size: 17px; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
 .share-trend-inline {
   display: inline-flex; align-items: center; gap: 3px;
   padding: 2px 8px; border-radius: 10px;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+  font-size: 10px; font-weight: 700;
 }
 .share-trend-inline i { font-size: 9px; }
 .share-trend-inline--up   { background: #10b981; color: #fff; }
@@ -457,19 +510,56 @@ export default {
 .ps-item--teal   { border-color: rgba(20,184,166,0.2); }
 .ps-item--teal   .ps-item__val  { color: #2dd4bf; }
 .ps-item--teal   .ps-item__icon { color: #14b8a6; }
+.ps-item--slate  { border-color: rgba(100,116,139,0.2); }
+.ps-item--slate  .ps-item__val  { color: #94a3b8; }
+.ps-item--slate  .ps-item__icon { color: #64748b; }
+.ps-item--amber  { border-color: rgba(245,158,11,0.2); }
+.ps-item--amber  .ps-item__val  { color: #fbbf24; font-size: 12px; }
+.ps-item--amber  .ps-item__icon { color: #f59e0b; }
 
-.profile-card__badge-count {
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
+/* Nominee panel */
+.profile-card__nominee {
+  flex-shrink: 0; width: 260px; align-self: stretch;
+  background: rgba(139,92,246,0.05);
+  border: 1px solid rgba(139,92,246,0.2);
+  border-radius: 16px; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.pn-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  background: rgba(139,92,246,0.1);
+  border-bottom: 1px solid rgba(139,92,246,0.15);
+  font-size: 11px; font-weight: 700; color: #a78bfa;
+  text-transform: uppercase; letter-spacing: 0.6px;
   flex-shrink: 0;
 }
-.count-ring {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: rgba(99,102,241,0.12);
-  border: 2px solid rgba(99,102,241,0.35);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; font-weight: 900; color: #a5b4fc;
+.pn-header i { font-size: 13px; }
+.pn-header small { font-size: 10px; color: #64748b; font-weight: 500; text-transform: none; letter-spacing: 0; }
+.pn-body {
+  padding: 16px; flex: 1;
+  display: flex; gap: 14px; align-items: flex-start;
 }
-.count-label { font-size: 11px; color: #334155; text-transform: uppercase; letter-spacing: 0.8px; }
+.pn-left { flex-shrink: 0; }
+.pn-photo-wrap {
+  width: 62px; height: 62px; border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(139,92,246,0.3);
+}
+.pn-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pn-rows { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.pn-row { display: flex; flex-direction: column; gap: 3px; }
+.pn-lbl {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;
+  color: #475569; display: flex; align-items: center; gap: 5px;
+}
+.pn-lbl i { font-size: 9px; color: #6366f1; width: 11px; }
+.pn-val { font-size: 13px; font-weight: 600; color: #cbd5e1; padding-left: 16px; }
+.pn-val--badge {
+  display: inline-block; padding: 2px 10px; border-radius: 20px;
+  background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3);
+  color: #a78bfa; font-size: 11px; margin-left: 16px;
+}
+.pn-val--mono { font-family: monospace; font-size: 12px; color: #94a3b8; }
 
 /* ── Deposits section ── */
 .deposits-section {
@@ -597,16 +687,22 @@ export default {
 @keyframes lbOut { from { opacity: 1; } to { opacity: 0; } }
 
 /* ── Responsive ── */
+@media (max-width: 1024px) {
+  .profile-card__nominee { width: 210px; }
+}
 @media (max-width: 768px) {
-  .profile-card { flex-direction: column; gap: 20px; padding: 24px 20px; }
-  .profile-card__badge-count { flex-direction: row; }
+  .profile-card { padding: 20px; gap: 16px; }
+  .pc-top { flex-wrap: wrap; }
+  .profile-card__nominee { width: 100%; align-self: auto; }
+  .pn-body { flex-direction: row; }
   .md-wrap { padding: 20px 16px 48px; }
   .deposits-section__header { padding: 16px 20px; }
   .dep-table th, .dep-table td { padding: 9px 10px; }
   .page-nav-bar__inner { padding: 0 16px; }
 }
 @media (max-width: 540px) {
-  .profile-card__name { font-size: 20px; }
-  .ps-item { min-width: 100%; }
+  .profile-card__name { font-size: 18px; }
+  .ps-item { min-width: calc(50% - 5px); }
+  .pc-top { gap: 14px; }
 }
 </style>

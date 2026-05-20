@@ -12,7 +12,35 @@
         <div class="card-body card_body_fixed_height">
           <div class="row">
             <template v-for="(field, index) in form_fields" :key="index">
+              <!-- Voucher No with regenerate button -->
+              <div v-if="field.name === 'voucher_no' && !param_id" :class="field.class">
+                <div class="form-group">
+                  <label>{{ field.label }}</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="voucher_no"
+                      :value="field.value"
+                      readonly
+                      style="background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.3); font-family: monospace; font-weight: 600; letter-spacing: 0.5px;"
+                    />
+                    <div class="input-group-append">
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        title="Generate new voucher number"
+                        @click="refreshVoucher"
+                      >
+                        <i class="fa fa-sync-alt"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <common-input
+                v-else
                 :label="field.label"
                 :type="field.type"
                 :name="field.name"
@@ -56,7 +84,21 @@ export default {
   methods: {
     ...mapActions(store, { create: "create", update: "update", details: "details", set_only_latest_data: "set_only_latest_data" }),
 
-    reset_fields() { this.form_fields.forEach(f => (f.value = "")); },
+    generateVoucherNo() {
+      const digits = Math.floor(10000000 + Math.random() * 90000000);
+      return `EV${digits}`;
+    },
+
+    reset_fields() {
+      this.form_fields.forEach(f => (f.value = ""));
+      const voucherField = this.form_fields.find(f => f.name === "voucher_no");
+      if (voucherField) voucherField.value = this.generateVoucherNo();
+    },
+
+    refreshVoucher() {
+      const field = this.form_fields.find(f => f.name === "voucher_no");
+      if (field) field.value = this.generateVoucherNo();
+    },
 
     async load_accounts() {
       try {

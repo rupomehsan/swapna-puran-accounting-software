@@ -61,7 +61,7 @@
           <button :class="['ftab ftab--p', filter==='share_deposit'&&'ftab--on']"   @click="filter='share_deposit'">Share</button>
           <button :class="['ftab ftab--b', filter==='extra_savings'&&'ftab--on']"   @click="filter='extra_savings'">Savings</button>
           <button :class="['ftab ftab--o', filter==='income'&&'ftab--on']"          @click="filter='income'">Income</button>
-          <button :class="['ftab ftab--y', filter==='due_created'&&'ftab--on']"     @click="filter='due_created'">Due</button>
+          <button :class="['ftab ftab--r', filter==='expense'&&'ftab--on']"        @click="filter='expense'">Expense</button>
         </div>
         <div class="search-field">
           <i class="fas fa-search"></i>

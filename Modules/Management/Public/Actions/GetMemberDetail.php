@@ -13,7 +13,7 @@ class GetMemberDetail
                 ->where('id', $userId)
                 ->where('role_id', 2)
                 ->whereNull('deleted_at')
-                ->select('id', 'name', 'image', 'phone', 'email', 'number_of_share', 'join_date', 'created_at')
+                ->select('id', 'name', 'image', 'phone', 'email', 'number_of_share', 'join_date', 'created_at', 'nominee_name', 'nominee_relation', 'nominee_nid', 'nominee_image')
                 ->first();
 
             if (!$member) {

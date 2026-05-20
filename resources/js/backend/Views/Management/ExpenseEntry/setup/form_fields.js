@@ -1,11 +1,12 @@
 export default [
     {
         name: "voucher_no",
-        label: "Voucher No",
+        label: "Voucher No (Auto Generated)",
         type: "text",
         value: "",
         is_visible: true,
         class: "col-md-6",
+        placeholder: "e.g. EV34543590",
     },
     {
         name: "expense_category",

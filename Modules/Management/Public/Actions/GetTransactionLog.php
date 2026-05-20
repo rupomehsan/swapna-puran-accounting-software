@@ -9,6 +9,7 @@ class GetTransactionLog
     public static function execute()
     {
         try {
+            // Fetch oldest-first so we can compute a correct global running balance
             $transactions = DB::table('transaction_logs as t')
                 ->leftJoin('users as u', 'u.id', '=', 't.user_id')
                 ->whereNull('t.deleted_at')
@@ -19,13 +20,28 @@ class GetTransactionLog
                     't.transaction_type',
                     't.amount',
                     't.direction',
-                    't.balance_after',
                     't.transaction_date',
                     't.description',
                     'u.name as member_name'
                 )
-                ->orderByDesc('t.transaction_date')
+                ->orderBy('t.transaction_date')
+                ->orderBy('t.id')
                 ->get();
+
+            // Compute a single global running balance across all transaction types
+            $runningBalance = 0;
+            $transactions = $transactions->map(function ($row) use (&$runningBalance) {
+                if ($row->direction === 'credit') {
+                    $runningBalance += (float) $row->amount;
+                } else {
+                    $runningBalance -= (float) $row->amount;
+                }
+                $row->balance_after = $runningBalance;
+                return $row;
+            });
+
+            // Reverse to newest-first for display
+            $transactions = $transactions->reverse()->values();
 
             $totalCredit = (float) $transactions->where('direction', 'credit')->sum('amount');
             $totalDebit  = (float) $transactions->where('direction', 'debit')->sum('amount');

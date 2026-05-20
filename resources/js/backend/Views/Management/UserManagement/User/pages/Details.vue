@@ -90,6 +90,43 @@
                 </tbody>
               </table>
 
+              <!-- Nominee Information -->
+              <div class="mt-4" v-if="item.nominee_name || item.nominee_relation || item.nominee_nid || item.nominee_image">
+                <h6 class="text-info mb-3">Nominee Information (নমিনি তথ্য)</h6>
+                <table class="table quick_modal_table table-bordered">
+                  <tbody>
+                    <tr>
+                      <th>Nominee Name (নমিনির নাম)</th>
+                      <th class="text-center">:</th>
+                      <th>{{ item.nominee_name || "N/A" }}</th>
+                    </tr>
+                    <tr>
+                      <th>Relation (সম্পর্ক)</th>
+                      <th class="text-center">:</th>
+                      <th>{{ item.nominee_relation || "N/A" }}</th>
+                    </tr>
+                    <tr>
+                      <th>NID / Birth Certificate (এনআইডি / জন্মসনদ)</th>
+                      <th class="text-center">:</th>
+                      <th>{{ item.nominee_nid || "N/A" }}</th>
+                    </tr>
+                    <tr v-if="item.nominee_image">
+                      <th>Nominee Image (নমিনির ছবি)</th>
+                      <th class="text-center">:</th>
+                      <th>
+                        <img
+                          height="100px"
+                          width="100px"
+                          :src="item.nominee_image"
+                          alt="Nominee Image"
+                          style="object-fit: cover; border-radius: 5px"
+                        />
+                      </th>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
               <!-- Address Information -->
               <div class="mt-4" v-if="item.address">
                 <h6 class="text-info mb-3">Address Information</h6>
