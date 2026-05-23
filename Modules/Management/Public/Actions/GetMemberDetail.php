@@ -64,8 +64,22 @@ class GetMemberDetail
                     ->first(['adjustment_type', 'from_shares', 'to_shares', 'shares_delta', 'created_at']);
             }
 
+            // Org settings for invoice generation
+            $orgName = DB::table('con_setting_title as t')
+                ->join('con_setting_title_values as v', 'v.setting_title_id', '=', 't.id')
+                ->where('t.title', 'site_name')->whereNull('t.deleted_at')
+                ->value('v.value') ?? 'Organization';
+            $orgLogo = DB::table('con_setting_title as t')
+                ->join('con_setting_title_values as v', 'v.setting_title_id', '=', 't.id')
+                ->where('t.title', 'image')->whereNull('t.deleted_at')
+                ->value('v.value');
+
             return entityResponse([
                 'member'  => $member,
+                'org'     => [
+                    'name' => $orgName,
+                    'logo' => $orgLogo ? (str_starts_with($orgLogo, 'http') || str_starts_with($orgLogo, '/') ? $orgLogo : '/' . $orgLogo) : null,
+                ],
                 'stats'   => [
                     'total_deposit'   => $totalDeposit,
                     'total_share'     => $totalShare,

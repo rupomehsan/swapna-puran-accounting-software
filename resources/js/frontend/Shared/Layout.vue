@@ -1,7 +1,6 @@
 <template>
- 
-    <Header />
-    <div class="header-spacer"></div>
+  <Header />
+  <div class="header-spacer"></div>
     <main class="main-wrapper">
       <slot />
     </main>

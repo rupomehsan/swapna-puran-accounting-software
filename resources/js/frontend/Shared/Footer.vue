@@ -26,6 +26,12 @@
           <a href="#" class="social-btn" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
           <a href="mailto:info@shopnopuron.com" class="social-btn" aria-label="Email"><i class="fas fa-envelope"></i></a>
         </div>
+        <div class="footer__download-section">
+          <a href="/swapnopuron.apk" download class="download-btn" aria-label="Download App">
+            <i class="fas fa-download"></i>
+            <span>Download App</span>
+          </a>
+        </div>
       </div>
 
       <!-- Col 2: Navigation -->
@@ -106,7 +112,11 @@ export default {
   name: 'SiteFooter',
   computed: {
     siteName() { return site_settings_store().get_setting_value('site_name') || 'শপনোপুরণ'; },
-    siteLogo()  { return site_settings_store().get_setting_value('image') || site_settings_store().get_setting_value('header_logo') || null; },
+    siteLogo() {
+      const v = site_settings_store().get_setting_value('image') || site_settings_store().get_setting_value('header_logo');
+      if (!v) return null;
+      return v.startsWith('http') || v.startsWith('/') ? v : '/' + v;
+    },
     year()      { return new Date().getFullYear(); },
   },
   methods: {
@@ -202,6 +212,28 @@ export default {
   border-color: rgba(99,102,241,0.4);
   color: #a5b4fc;
   transform: translateY(-2px);
+}
+
+/* Download Button */
+.footer__download-section {
+  margin-top: 20px;
+}
+.download-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: white; text-decoration: none; font-size: 13px; font-weight: 600;
+  border: 1px solid rgba(99,102,241,0.4);
+  transition: all 0.3s ease;
+}
+.download-btn:hover {
+  background: linear-gradient(135deg, #818cf8, #a5b4fc);
+  border-color: rgba(99,102,241,0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(99,102,241,0.3);
+}
+.download-btn i {
+  font-size: 12px;
 }
 
 /* Columns */

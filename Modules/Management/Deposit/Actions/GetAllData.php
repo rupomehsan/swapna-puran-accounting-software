@@ -17,7 +17,7 @@ class GetAllData
             $end_date      = request()->input('end_date');
 
             $with = [
-                'member:id,name,email',
+                'member:id,name,email,phone,number_of_share',
                 'due:id,due_amount,paid_amount,remaining_amount,payment_status,for_month',
             ];
 

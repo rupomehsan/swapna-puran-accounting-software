@@ -33,6 +33,7 @@
     "chokidar": "^4.0.3",
     "debounce": "^1.2.1",
     "filefy": "^0.1.11",
+    "html2pdf.js": "^0.14.0",
     "lightbox2": "^2.11.4",
     "moment": "^2.30.1",
     "nouislider": "^15.7.2",

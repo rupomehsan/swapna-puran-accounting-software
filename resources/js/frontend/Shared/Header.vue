@@ -145,7 +145,11 @@ export default {
   computed: {
     ...mapState(auth_store, ['is_auth', 'auth_info']),
     siteName() { return site_settings_store().get_setting_value('site_name') || 'শপনোপুরণ'; },
-    siteLogo() { return site_settings_store().get_setting_value('image') || site_settings_store().get_setting_value('header_logo') || null; },
+    siteLogo() {
+      const v = site_settings_store().get_setting_value('image') || site_settings_store().get_setting_value('header_logo');
+      if (!v) return null;
+      return v.startsWith('http') || v.startsWith('/') ? v : '/' + v;
+    },
   },
   async mounted() {
     site_settings_store().get_all_website_settings();

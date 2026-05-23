@@ -91,7 +91,15 @@
                   <table-head />
                 </thead>
                 <tbody v-if="all?.data?.length">
-                  <table-body :data="all?.data" />
+                  <table-body :data="all?.data">
+                    <template #row-actions="{ item }">
+                      <li>
+                        <a href="#" class="text-info" @click.prevent="$refs.invoiceModal.open(item)" title="Invoice">
+                          <i class="fa fa-file-text-o"></i> Invoice
+                        </a>
+                      </li>
+                    </template>
+                  </table-body>
                 </tbody>
                 <tbody v-else>
                   <tr>
@@ -152,6 +160,7 @@
     <quick-view />
     <filter-data />
     <import-modal />
+    <invoice-modal ref="invoiceModal" />
   </div>
 </template>
 
@@ -176,6 +185,7 @@ import FilterData from "@/shared/components/canvas/FilterData.vue";
 import ImportModal from "@/shared/components/canvas/ImportModal.vue";
 import QuickView from "@/shared/components/canvas/QuickView.vue";
 import ExportLoader from "@/shared/components/canvas/ExportLoader.vue";
+import InvoiceModal from "../components/InvoiceModal.vue";
 
 export default {
   components: {
@@ -187,6 +197,7 @@ export default {
     ImportModal,
     QuickView,
     ExportLoader,
+    InvoiceModal,
   },
 
   // Provide setup and store to child components via dependency injection

@@ -4,7 +4,11 @@
     :key="item.id"
     :class="`table_rows table_row_${item.id}`"
   >
-    <td><table-row-action :item="item" /></td>
+    <td>
+      <table-row-action :item="item">
+        <slot name="row-actions" :item="item" />
+      </table-row-action>
+    </td>
     <td><select-single :data="item" /></td>
 
     <template v-for="(key, index) in moduleSetup.table_row_data" :key="index">

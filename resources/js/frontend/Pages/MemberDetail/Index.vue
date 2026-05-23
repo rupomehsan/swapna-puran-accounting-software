@@ -177,6 +177,7 @@
                   <th>Method</th>
                   <th>Note</th>
                   <th>Voucher</th>
+                  <th>Invoice</th>
                 </tr>
               </thead>
               <tbody>
@@ -200,13 +201,18 @@
                     </button>
                     <span v-else class="no-img">—</span>
                   </td>
+                  <td class="td-inv">
+                    <button class="inv-dl-btn" @click="downloadInvoice(d)" title="Download Invoice">
+                      <i class="fas fa-file-arrow-down"></i>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr class="dep-foot">
                   <td colspan="3"><strong>Total</strong></td>
                   <td class="td-amount"><strong>৳ {{ fmt(stats.total_deposit) }}</strong></td>
-                  <td colspan="5"></td>
+                  <td colspan="6"></td>
                 </tr>
               </tfoot>
             </table>
@@ -256,6 +262,7 @@ export default {
       loading:     true,
       notFound:    false,
       member:      null,
+      org:         { name: 'Organization', logo: null },
       stats:       { total_deposit: 0, total_share: 0, total_savings: 0, total_due: 0, deposit_count: 0, paid_till: null, last_adjustment: null },
       deposits:    [],
       lightboxSrc: null,
@@ -272,6 +279,7 @@ export default {
       const res = await axios.get(`${location.origin}/api/public/member/${this.memberId}/detail`);
       const d   = res.data.data;
       this.member   = d.member;
+      this.org      = d.org || { name: 'Organization', logo: null };
       this.stats    = d.stats;
       this.deposits = d.deposits;
     } catch (e) {
@@ -324,6 +332,101 @@ export default {
       if (!html) return '';
       const text = String(html).replace(/<[^>]*>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
       return text;
+    },
+    async downloadInvoice(deposit) {
+      const { default: html2pdf } = await import('html2pdf.js');
+
+      const m   = this.member;
+      const org = this.org;
+      const note = this.stripHtml(deposit.note);
+
+      // A4 usable px at 96dpi with 12mm margins: (210-24)*96/25.4 ≈ 703px → use 700px
+      const W = 700;
+      const colW = Math.floor((W - 16) / 2);   // two equal columns with 16px gap
+
+      const logoHtml = org.logo
+        ? `<img src="${org.logo}" style="width:50px;height:50px;object-fit:contain;border-radius:8px;border:1px solid #e2e8f0;vertical-align:middle;" alt="logo">`
+        : `<span style="display:inline-block;width:50px;height:50px;border-radius:8px;background:#6366f1;color:#fff;font-size:19px;font-weight:800;text-align:center;line-height:50px;vertical-align:middle;">${(org.name||'O').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()}</span>`;
+
+      const typeChip = deposit.deposit_type === 'share_deposit'
+        ? `<span style="display:inline-block;padding:1px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#ede9fe;color:#6d28d9;">Share Deposit</span>`
+        : `<span style="display:inline-block;padding:1px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#dbeafe;color:#1d4ed8;">Extra Savings</span>`;
+
+      const row = (lbl, val) =>
+        `<div style="margin-bottom:6px;font-size:11.5px;">
+           <span style="color:#64748b;display:inline-block;width:106px;">${lbl}</span>
+           <span style="color:#94a3b8;margin:0 4px;">:</span>
+           <span style="font-weight:600;color:#1e293b;">${val}</span>
+         </div>`;
+
+      const el = document.createElement('div');
+      el.style.cssText = `font-family:Arial,sans-serif;background:#ffffff;color:#1e293b;width:${W}px;padding:32px 36px;box-sizing:border-box;`;
+
+      el.innerHTML = `
+        <!-- header -->
+        <table style="width:100%;border-collapse:collapse;margin-bottom:18px;"><tr>
+          <td style="vertical-align:middle;">
+            ${logoHtml}
+            <span style="display:inline-block;vertical-align:middle;margin-left:11px;">
+              <div style="font-size:17px;font-weight:800;color:#0f172a;">${org.name}</div>
+              <div style="font-size:10.5px;color:#64748b;margin-top:2px;">Member Deposit Receipt</div>
+            </span>
+          </td>
+          <td style="vertical-align:top;text-align:right;">
+            <div style="display:inline-block;padding:5px 13px;background:#f1f5f9;border:2px solid #6366f1;border-radius:7px;font-size:12.5px;font-weight:800;color:#4338ca;letter-spacing:1px;">${deposit.voucher_no||'—'}</div>
+            <div style="font-size:10.5px;color:#64748b;margin-top:5px;">Date: <b>${this.fmtDate(deposit.payment_date||deposit.created_at)}</b></div>
+          </td>
+        </tr></table>
+
+        <div style="border-top:2px solid #e2e8f0;margin:0 0 16px;"></div>
+
+        <!-- two columns -->
+        <table style="width:100%;border-collapse:collapse;margin-bottom:16px;"><tr>
+          <td style="width:${colW}px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:13px 15px;vertical-align:top;">
+            <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:700;border-bottom:1px solid #e2e8f0;padding-bottom:5px;margin-bottom:9px;">Member Information</div>
+            ${row('Member Name', m.name||'—')}
+            ${row('Phone',       m.phone||'—')}
+            ${row('Email',       m.email||'—')}
+            ${row('Total Shares',(m.number_of_share||'—')+' shares')}
+          </td>
+          <td style="width:16px;"></td>
+          <td style="width:${colW}px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:13px 15px;vertical-align:top;">
+            <div style="font-size:8.5px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:700;border-bottom:1px solid #e2e8f0;padding-bottom:5px;margin-bottom:9px;">Deposit Details</div>
+            <div style="margin-bottom:6px;font-size:11.5px;"><span style="color:#64748b;display:inline-block;width:106px;">Deposit Type</span><span style="color:#94a3b8;margin:0 4px;">:</span>${typeChip}</div>
+            ${row('For Month',      this.fmtMonth(deposit.for_month))}
+            ${row('Payment Method', deposit.payment_method||'—')}
+            ${row('Payment Date',   this.fmtDate(deposit.payment_date))}
+          </td>
+        </tr></table>
+
+        <!-- amount box -->
+        <table style="width:100%;border-collapse:collapse;background:#6366f1;border-radius:10px;padding:0;margin:0 0 14px;"><tr>
+          <td style="padding:17px 22px;font-size:12px;font-weight:600;color:#fff;vertical-align:middle;">Total Amount Received</td>
+          <td style="padding:17px 22px;font-size:25px;font-weight:900;color:#fff;text-align:right;vertical-align:middle;">৳ ${this.fmt(deposit.amount)}</td>
+        </tr></table>
+
+        ${note ? `<div style="background:#f0f4ff;border-left:3px solid #6366f1;padding:8px 12px;font-size:11px;color:#3730a3;margin-bottom:14px;"><span style="font-weight:700;color:#6366f1;">Note:</span> ${note}</div>` : ''}
+
+        <!-- footer -->
+        <div style="border-top:1px solid #e2e8f0;margin-top:42px;padding-top:16px;">
+          <table style="width:100%;border-collapse:collapse;"><tr>
+            <td style="text-align:center;width:33%;vertical-align:bottom;"><div style="height:64px;"></div><div style="border-top:1.5px solid #334155;margin-bottom:5px;"></div><div style="font-size:9.5px;color:#64748b;">Member Signature</div></td>
+            <td style="text-align:center;width:34%;vertical-align:bottom;">
+              <div style="font-size:9.5px;color:#94a3b8;">Generated on ${new Date().toLocaleString('en-BD',{dateStyle:'medium',timeStyle:'short'})}</div>
+              <div style="font-size:8.5px;color:#cbd5e1;margin-top:2px;">This is a computer-generated receipt.</div>
+            </td>
+            <td style="text-align:center;width:33%;vertical-align:bottom;"><div style="height:64px;display:flex;align-items:flex-end;justify-content:center;"><img src="/signature.png" style="max-height:60px;max-width:160px;object-fit:contain;" alt="Authorized Signature"></div><div style="border-top:1.5px solid #334155;margin-bottom:5px;"></div><div style="font-size:9.5px;color:#64748b;">Authorized Signature</div></td>
+          </tr></table>
+        </div>
+      `;
+
+      await html2pdf().set({
+        margin:      [10, 12, 10, 12],
+        filename:    `receipt-${deposit.voucher_no || deposit.id}.pdf`,
+        image:       { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff', windowWidth: W },
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      }).from(el).save();
     },
   },
 };
@@ -651,6 +754,15 @@ export default {
 }
 .voucher-thumb-btn:hover .voucher-thumb-overlay { opacity: 1; }
 .no-img { color: #334155; font-size: 12px; }
+.td-inv { width: 52px; text-align: center; }
+.inv-dl-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer;
+  background: rgba(99,102,241,0.12); color: #a5b4fc;
+  transition: background 0.18s, transform 0.15s;
+  font-size: 15px;
+}
+.inv-dl-btn:hover { background: rgba(99,102,241,0.28); color: #818cf8; transform: scale(1.1); }
 
 /* ── Lightbox ── */
 .lightbox {
