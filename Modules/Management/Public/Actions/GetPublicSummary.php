@@ -14,7 +14,7 @@ class GetPublicSummary
             $totalIncome      = (float) DB::table('income_entries')->whereNull('deleted_at')->where('status', 'active')->sum('amount');
             $totalExpense     = (float) DB::table('expense_entries')->whereNull('deleted_at')->where('status', 'active')->sum('amount');
             $totalMembers     = DB::table('users')->where('role_id', 2)->whereNull('deleted_at')->where('status', 'active')->count();
-            $netFund          = $totalDeposits - $totalWithdrawals;
+            $netFund          = $totalDeposits + $totalIncome - $totalExpense - $totalWithdrawals;
 
             $members = DB::table('users as u')
                 ->where('u.role_id', 2)

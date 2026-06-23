@@ -17,7 +17,7 @@ class GetAllDashboardData
             $totalIncome      = (float) DB::table('income_entries')->whereNull('deleted_at')->where('status', 'active')->sum('amount');
             $totalExpense     = (float) DB::table('expense_entries')->whereNull('deleted_at')->where('status', 'active')->sum('amount');
             $totalDueUnpaid   = (float) DB::table('dues')->whereNull('deleted_at')->whereIn('payment_status', ['unpaid', 'partial'])->sum('remaining_amount');
-            $netFund          = $totalDeposits - $totalWithdrawals;
+            $netFund          = $totalDeposits + $totalIncome - $totalExpense - $totalWithdrawals;
             $netProfitLoss    = $totalIncome - $totalExpense;
 
             // ── Monthly trend — last 6 months ───────────────────────────────
